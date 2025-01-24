@@ -12,9 +12,10 @@ export const makeStore = () => {
 const store = makeStore();
 const initializeApp = async () => {
   try {
-    await store.dispatch(
-      authApi.endpoints.loadUser.initiate({}, { forceRefetch: true })
-    );
+    const result = await store.dispatch(authApi.endpoints.loadUser.initiate());
+    if (result.error) {
+      console.error("Failed to load user:", result.error);
+    }
   } catch (error) {
     console.error("Failed to load user:", error);
   }

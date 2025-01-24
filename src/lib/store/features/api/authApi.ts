@@ -24,26 +24,28 @@ interface LoginResponse {
   accessToken: string;
   message?: string; // Add the message property
 }
+
+interface UpdateResponse {
+  user: User;
+  message?: string;
+}
 const USER_API = "https://mlm-sebsite-backend.onrender.com/api/v1/users/";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({ baseUrl: USER_API, credentials: "include" }),
+  tagTypes: ["User"], // Add the User tag type for caching
   endpoints: (builder) => ({
     registerUser: builder.mutation<
       RegisterResponse,
       { name: string; email: string; password: string; referredBy: string }
     >({
-      query: (credentials) => {
-        if (!credentials.name || !credentials.email || !credentials.password) {
-          throw new Error("All fields are required.");
-        }
-        return {
-          url: "register",
-          method: "POST",
-          body: credentials,
-        };
-      },
+      query: (credentials) => ({
+        url: "register",
+        method: "POST",
+        body: credentials,
+      }),
+      invalidatesTags: ["User"],
     }),
     loginUser: builder.mutation<
       LoginResponse,
@@ -59,14 +61,13 @@ export const authApi = createApi({
           const result = await queryFulfilled;
           const user = result.data?.user;
           if (user) {
-            dispatch(userLoggedIn({ user }));
+            dispatch(userLoggedIn({ user, token: result.data?.accessToken }));
           }
         } catch (error: any) {
-          if ("data" in error) {
-            console.error("Server error:", error.data); // Server-side error
-          } else {
-            console.error("Client error:", error.message); // Client-side error
-          }
+          console.error(
+            error.data ? "Server error:" : "Client error:",
+            error.message || error.data
+          );
         }
       },
     }),
@@ -80,48 +81,50 @@ export const authApi = createApi({
           await queryFulfilled;
           dispatch(userLoggedOut());
         } catch (error: any) {
-          if ("data" in error) {
-            console.error("Server error:", error.data); // Server-side error
-          } else {
-            console.error("Client error:", error.message); // Client-side error
-          }
+          console.error(
+            error.data ? "Server error:" : "Client error:",
+            error.message || error.data
+          );
         }
       },
     }),
-    loadUser: builder.query({
+    loadUser: builder.query<RegisterResponse, void>({
       query: () => ({
         url: "profile",
         method: "GET",
       }),
+      providesTags: ["User"],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
           const user = result.data?.user;
-          dispatch(userLoggedIn({ user }));
-        } catch (error: any) {
-          if ("data" in error) {
-            console.error("Server error:", error.data); // Server-side error
-          } else {
-            console.error("Client error:", error.message); // Client-side error
+          if (user) {
+            dispatch(userLoggedIn({ user }));
           }
+        } catch (error: any) {
+          console.error(
+            error.data ? "Server error:" : "Client error:",
+            error.message || error.data
+          );
         }
       },
     }),
-    updateUser: builder.mutation({
+    updateUser: builder.mutation<UpdateResponse, Partial<User>>({
       query: (credentials) => ({
         url: "profile/update",
-        method: "PUT",
+        method: "PATCH",
         body: credentials,
         credentials: "include",
       }),
+      invalidatesTags: ["User"],
     }),
   }),
 });
 
 export const {
   useRegisterUserMutation,
-  useLoginUserMutation,
-  useLogoutUserMutation,
   useLoadUserQuery,
+  useLoginUserMutation,
   useUpdateUserMutation,
+  useLogoutUserMutation,
 } = authApi;

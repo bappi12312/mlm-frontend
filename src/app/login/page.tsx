@@ -68,14 +68,39 @@ const Login = () => {
   };
 
   const handleRegistration = async (type: String) => {
-    const inputData = type === "signup" ? signupInput : loginInput;
+    const inputData: { [key: string]: string } =
+      type === "signup" ? signupInput : loginInput;
+
+    if (
+      type === "signup" &&
+      (!inputData.name || !inputData.email || !inputData.password)
+    ) {
+      return toast.error("All fields are required for signup.");
+    }
+
+    if (type === "login" && (!inputData.email || !inputData.password)) {
+      return toast.error("Email and password are required for login.");
+    }
+
+    // Add `name` only if type is "login"
+    const payload = type === "signup" ? inputData : { ...inputData, name: "" };
+
     const action = type === "signup" ? registerUser : loginUser;
-    await action(inputData as any);
+
+    // Trigger the action with the payload
+    await action(payload as any);
   };
 
   useEffect(() => {
     if (registerIsSuccess) {
-      toast.success(registerData?.message || "Signup successful.");
+      setLoginInput({
+        email: signupInput.email,
+        password: signupInput.password,
+      });
+      toast.success(
+        registerData?.message || "Signup successful. You can now log in."
+      );
+      router.push("/")
     } else if (registerError) {
       // Check if the error is of type FetchBaseQueryError
       if ("data" in registerError) {
@@ -123,6 +148,7 @@ const Login = () => {
                 <Input
                   type="text"
                   name="name"
+                  aria-label="Name"
                   value={signupInput.name}
                   onChange={(e) => changeInputHandler(e, "signup")}
                   placeholder="name"
@@ -214,6 +240,7 @@ const Login = () => {
             <CardFooter>
               <Button
                 disabled={loginIsLoading}
+                aria-label={loginIsLoading ? "Logging in" : "Login"}
                 onClick={() => handleRegistration("login")}
               >
                 {loginIsLoading ? (

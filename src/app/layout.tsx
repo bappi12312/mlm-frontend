@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import { StoreProvider } from "./StoreProvider";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <StoreProvider>
           <Navbar />
           {children}
+          <Toaster />
         </StoreProvider>
       </body>
     </html>
