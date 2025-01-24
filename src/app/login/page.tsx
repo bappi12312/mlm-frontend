@@ -21,7 +21,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface APIError {
-  message: string;
+  message?: string;
+  data?: string;
   [key: string]: any; // Allow additional properties if needed
 }
 
@@ -30,7 +31,7 @@ const Login = () => {
     name: "",
     email: "",
     password: "",
-    refferedBy: "",
+    referredBy: "",
   });
   const [loginInput, setLoginInput] = useState({ email: "", password: "" });
 
@@ -54,7 +55,10 @@ const Login = () => {
   ] = useLoginUserMutation();
   const router = useRouter();
 
-  const changeInputHandler = (e: any, type: String) => {
+  const changeInputHandler = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
     const { name, value } = e.target;
     if (type === "signup") {
       setSignupInput({ ...signupInput, [name]: value });
@@ -66,35 +70,38 @@ const Login = () => {
   const handleRegistration = async (type: String) => {
     const inputData = type === "signup" ? signupInput : loginInput;
     const action = type === "signup" ? registerUser : loginUser;
-    await action(inputData);
+    await action(inputData as any);
   };
 
   useEffect(() => {
-    if (registerIsSuccess && registerData) {
-      toast.success(registerData.message || "Signup successful.");
-    }
-    if (registerError && "data" in registerError) {
-      const errorData = registerError.data as APIError; // Cast to the expected type
-      toast.error(errorData.message || "Signup Failed");
+    if (registerIsSuccess) {
+      toast.success(registerData?.message || "Signup successful.");
+    } else if (registerError) {
+      // Check if the error is of type FetchBaseQueryError
+      if ("data" in registerError) {
+        const errorData = registerError.data as APIError;
+        toast.error(errorData?.message || "Signup Failed");
+      } else {
+        // Handle other types of errors (e.g., SerializedError)
+        toast.error("An unexpected error occurred during signup.");
+      }
     }
 
-    if (loginIsSuccess && loginData) {
-      toast.success(loginData.message || "Login successful.");
-      router.push("/login");
+    if (loginIsSuccess) {
+      toast.success(loginData?.message || "Login successful.");
+      router.push("/dashboard"); // Redirect after login
+    } else if (loginError) {
+      // Check if the error is of type FetchBaseQueryError
+      if ("data" in loginError) {
+        const errorData = loginError.data as APIError;
+        toast.error(errorData?.message || "Login Failed");
+      } else {
+        // Handle other types of errors (e.g., SerializedError)
+        toast.error("An unexpected error occurred during login.");
+      }
     }
-    if (loginError && "data" in loginError) {
-      const errorData = loginError?.data as APIError; // Cast to the expected type
-      toast.error(errorData.message || "Signup Failed");
-    }
-  }, [
-    loginData,
-    registerData,
-    loginError,
-    registerError,
-    router,
-    registerIsSuccess,
-    loginIsSuccess,
-  ]);
+  }, [registerIsSuccess, registerError, loginIsSuccess, loginError, router]);
+
   return (
     <div className="flex items-center w-full justify-center mt-20">
       <Tabs defaultValue="login" className="w-[400px]">
@@ -118,41 +125,40 @@ const Login = () => {
                   name="name"
                   value={signupInput.name}
                   onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. patel"
+                  placeholder="name"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="username">Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   type="email"
                   name="email"
                   value={signupInput.email}
                   onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. patel@gmail.com"
+                  placeholder="@gmail.com"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="username">Password</Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   type="password"
                   name="password"
                   value={signupInput.password}
                   onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. xyz"
+                  placeholder="password"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="name">Reffered By</Label>
+                <Label htmlFor="referredBy">Referral Code</Label>
                 <Input
                   type="text"
-                  name="refferedBy"
-                  value={signupInput?.refferedBy}
+                  name="referredBy"
+                  value={signupInput?.referredBy}
                   onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Eg. patel"
-                  required
+                  placeholder="Optional referral code"
                 />
               </div>
             </CardContent>

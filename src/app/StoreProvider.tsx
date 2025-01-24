@@ -1,16 +1,12 @@
 "use client"
 import { Provider } from "react-redux"
-import React,{ReactNode,useRef} 
+import React,{ReactNode,useMemo} 
 from "react"
-import { makeStore, AppStore } from "../lib/store/store"
+import { makeStore } from "../lib/store/store"
 
 
 export const StoreProvider = ({children}:{children:ReactNode}) => {
-  const storeRef = useRef<AppStore>(null);
+  const store = useMemo(() => makeStore(), []);
 
-  if (!storeRef.current) {
-    storeRef.current = makeStore();
-  }
-
-  return <Provider store={storeRef.current}>{children}</Provider>;
+  return <Provider store={store}>{children}</Provider>;
 }

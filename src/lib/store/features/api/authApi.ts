@@ -1,20 +1,54 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "../authSlice";
 
-const USER_API = "http://localhost:8000/api/v1/user/";
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  referredBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: string;
+  role?: string;
+  downline?: string[];
+  transactions?: string[];
+}
+
+interface RegisterResponse {
+  user: User;
+  message?: string; // Add the message property
+}
+
+interface LoginResponse {
+  user: User;
+  accessToken: string;
+  message?: string; // Add the message property
+}
+const USER_API = "https://mlm-sebsite-backend.onrender.com/api/v1/users/";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({ baseUrl: USER_API, credentials: "include" }),
   endpoints: (builder) => ({
-    registerUser: builder.mutation({
-      query: (credentials) => ({
-        url: "register",
-        method: "POST",
-        body: credentials,
-      }),
+    registerUser: builder.mutation<
+      RegisterResponse,
+      { name: string; email: string; password: string; referredBy: string }
+    >({
+      query: (credentials) => {
+        if (!credentials.name || !credentials.email || !credentials.password) {
+          throw new Error("All fields are required.");
+        }
+        return {
+          url: "register",
+          method: "POST",
+          body: credentials,
+        };
+      },
     }),
-    loginUser: builder.mutation({
+    loginUser: builder.mutation<
+      LoginResponse,
+      { email: string; password: string }
+    >({
       query: (credentials) => ({
         url: "login",
         method: "POST",
@@ -24,7 +58,9 @@ export const authApi = createApi({
         try {
           const result = await queryFulfilled;
           const user = result.data?.user;
-          dispatch(userLoggedIn({ user }));
+          if (user) {
+            dispatch(userLoggedIn({ user }));
+          }
         } catch (error: any) {
           if ("data" in error) {
             console.error("Server error:", error.data); // Server-side error
@@ -43,11 +79,11 @@ export const authApi = createApi({
         try {
           await queryFulfilled;
           dispatch(userLoggedOut());
-        } catch (error:any) {
-          if ('data' in error) {
-            console.error('Server error:', error.data); // Server-side error
+        } catch (error: any) {
+          if ("data" in error) {
+            console.error("Server error:", error.data); // Server-side error
           } else {
-            console.error('Client error:', error.message); // Client-side error
+            console.error("Client error:", error.message); // Client-side error
           }
         }
       },
@@ -62,11 +98,11 @@ export const authApi = createApi({
           const result = await queryFulfilled;
           const user = result.data?.user;
           dispatch(userLoggedIn({ user }));
-        } catch (error:any) {
-          if ('data' in error) {
-            console.error('Server error:', error.data); // Server-side error
+        } catch (error: any) {
+          if ("data" in error) {
+            console.error("Server error:", error.data); // Server-side error
           } else {
-            console.error('Client error:', error.message); // Client-side error
+            console.error("Client error:", error.message); // Client-side error
           }
         }
       },
