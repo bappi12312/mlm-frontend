@@ -20,6 +20,7 @@ interface UserState {
   token: string | null;
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
 }
 
 
@@ -28,6 +29,7 @@ const initialState: UserState = {
   token: null,
   loading: false,
   error: null,
+  isAuthenticated: false,
 };
 export interface AuthState {
   isAuthenticated: boolean;
@@ -41,10 +43,12 @@ const authSlice = createSlice({
     userLoggedIn: (state, action: PayloadAction<any>) => {
       state.user = action.payload.user;
       state.token = action.payload.token || null;
+      state.isAuthenticated = true;
     },
     userLoggedOut: (state) => {
       state.user = null;
       state.token = null;
+      state.isAuthenticated = false;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
