@@ -88,7 +88,8 @@ const Login = () => {
     const action = type === "signup" ? registerUser : loginUser;
 
     // Trigger the action with the payload
-    await action(payload as any);
+   const response = await action(payload as any).unwrap();
+   toast.success(response?.message || "Signup successful. You can now log in.");
   };
 
   useEffect(() => {

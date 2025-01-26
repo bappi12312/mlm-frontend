@@ -1,44 +1,112 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "../authSlice";
+import { RootState } from "../../store";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
 
 interface User {
-  _id: string;
   name: string;
   email: string;
-  referredBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  status?: string;
-  role?: string;
+  role: string;
+  referalCode?: string;
+  referredBy?: string | null;
+  earnings?: number;
+  directRecruit?: number;
+  status: string;
+  photo?: string;
   downline?: string[];
+  _id: string;
   transactions?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
-
 interface RegisterResponse {
   user: User;
-  message?: string; // Add the message property
+  message: string; // Add the message property
 }
 
 interface LoginResponse {
-  user: User;
+  user: User | null;
   accessToken: string;
-  message?: string; // Add the message property
+  refreshToken: string;
+  message: string; // Add the message property
 }
 
 interface UpdateResponse {
   user: User;
   message?: string;
 }
-const USER_API = "https://mlm-sebsite-backend.onrender.com/api/v1/users/";
+// const USER_API = "https://mlm-sebsite-backend.onrender.com/api/v1/users/";
+
+const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  const state = api.getState() as RootState;
+  let accessToken = state.auth.accessToken || Cookies.get("accessToken");
+
+  if (accessToken) {
+    const decoded: any = jwtDecode(accessToken);
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (decoded.exp - currentTime < 300) {
+      const refreshToken = Cookies.get("refreshToken");
+
+      if (refreshToken) {
+        try {
+          const refreshResult = await fetchBaseQuery({
+            baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
+          })(
+            {
+              url: "refresh-access-token",
+              method: "POST",
+              body: { refreshToken },
+            },
+            api,
+            extraOptions
+          );
+
+          if (refreshResult.data) {
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+              refreshResult.data as LoginResponse;
+
+            api.dispatch(
+              userLoggedIn({
+                user: state.auth.user,
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+              })
+            );
+
+            Cookies.set("accessToken", newAccessToken, { secure: true, sameSite: "strict" });
+            Cookies.set("refreshToken", newRefreshToken, { secure: true, sameSite: "strict" });
+
+            args.headers.set("authorization", `Bearer ${newAccessToken}`);
+          } else {
+            throw new Error("Token refresh failed");
+          }
+        } catch (error) {
+          api.dispatch(userLoggedOut());
+          return { error: { status: 401, message: "Unauthorized" } };
+        }
+      } else {
+        api.dispatch(userLoggedOut());
+        return { error: { status: 401, message: "No refresh token available" } };
+      }
+    }
+  }
+
+  return fetchBaseQuery({
+    baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
+  })(args, api, extraOptions);
+};
+
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: USER_API, credentials: "include" }),
-  tagTypes: ["User"], // Add the User tag type for caching
+  baseQuery:baseQueryWithReauth,
+  tagTypes: ["User", "Payment", "Stats"], // Add the User tag type for caching
   endpoints: (builder) => ({
     registerUser: builder.mutation<
       RegisterResponse,
-      { name: string; email: string; password: string; referredBy: string }
+      { name: string; email: string; password: string; referredBy: string; }
     >({
       query: (credentials) => ({
         url: "register",
@@ -60,14 +128,24 @@ export const authApi = createApi({
         try {
           const result = await queryFulfilled;
           const user = result.data?.user;
+
           if (user) {
-            dispatch(userLoggedIn({ user, token: result.data?.accessToken }));
+            dispatch(
+              userLoggedIn({
+                user: {
+                  ...user,
+                  referalCode: user.referalCode || "", // Default values for missing fields
+                  earnings: user.earnings || 0,
+                  directRecruit: user.directRecruit || 0,
+                  photo: user.photo || "",
+                },
+                accessToken: result.data.accessToken,
+                refreshToken: result.data.refreshToken || "", // No accessToken in this query
+              })
+            );
           }
         } catch (error: any) {
-          console.error(
-            error.data ? "Server error:" : "Client error:",
-            error.message || error.data
-          );
+          console.error("Login error:", error.message || error.data);
         }
       },
     }),
@@ -80,15 +158,17 @@ export const authApi = createApi({
         try {
           await queryFulfilled;
           dispatch(userLoggedOut());
+
+          Cookies.remove("accessToken");
+          Cookies.remove("refreshToken");
+
+          window.location.href = "/login";
         } catch (error: any) {
-          console.error(
-            error.data ? "Server error:" : "Client error:",
-            error.message || error.data
-          );
+          console.error("Logout error:", error.message || error.data);
         }
       },
     }),
-    loadUser: builder.query<RegisterResponse, void>({
+    loadUser: builder.query<LoginResponse, void>({
       query: () => ({
         url: "profile",
         method: "GET",
@@ -98,23 +178,93 @@ export const authApi = createApi({
         try {
           const result = await queryFulfilled;
           const user = result.data?.user;
+
           if (user) {
-            dispatch(userLoggedIn({ user }));
+            dispatch(
+              userLoggedIn({
+                user: {
+                  ...user,
+                  referalCode: user.referalCode || "", // Default values for missing fields
+                  earnings: user.earnings || 0,
+                  directRecruit: user.directRecruit || 0,
+                  photo: user.photo || "",
+                },
+                accessToken: result.data.accessToken || "",
+                refreshToken: result.data.refreshToken || "", // No accessToken in this query
+              })
+            );
           }
         } catch (error: any) {
-          console.error(
-            error.data ? "Server error:" : "Client error:",
-            error.message || error.data
-          );
+          console.error("Load user error:", error.message || error.data);
         }
       },
     }),
     updateUser: builder.mutation<UpdateResponse, Partial<User>>({
       query: (credentials) => ({
-        url: "profile/update",
+        url: "update-user",
         method: "PATCH",
         body: credentials,
-        credentials: "include",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    paymentCreation: builder.mutation({
+      query: (credentials) => ({
+        url: "payment-creation",
+        method: "POST",
+        body: credentials,
+      }),
+      invalidatesTags: ["Payment"],
+    }),
+    getAllPayments: builder.query({
+      query: () => ({
+        url: "payments",
+        method: "GET",
+      }),
+      providesTags: ["Payment"],
+    }),
+    getUserStats: builder.query({
+      query: () => ({
+        url: "stats",
+        method: "GET",
+      }),
+      providesTags: ["Stats"],
+    }),
+    changePassword: builder.mutation({
+      query: (credentials) => ({
+        url: "change-password",
+        method: "PATCH",
+        body: credentials,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getAllUsers: builder.query({
+      query: () => ({
+        url: "get-all-users",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    distributeCommission: builder.mutation({
+      query: (body) => ({
+        url: "distribute-commision",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    requestPayment: builder.mutation({
+      query: (body) => ({
+        url: "paymentRequest",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    confirmPayment: builder.mutation({
+      query: (body) => ({
+        url: "payment-confirmation",
+        method: "PATCH",
+        body,
       }),
       invalidatesTags: ["User"],
     }),
@@ -127,4 +277,12 @@ export const {
   useLoginUserMutation,
   useUpdateUserMutation,
   useLogoutUserMutation,
+  usePaymentCreationMutation,
+  useGetAllPaymentsQuery,
+  useGetUserStatsQuery,
+  useChangePasswordMutation,
+  useGetAllUsersQuery,
+  useDistributeCommissionMutation,
+  useRequestPaymentMutation,
+  useConfirmPaymentMutation,
 } = authApi;
