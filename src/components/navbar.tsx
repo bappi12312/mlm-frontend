@@ -3,10 +3,13 @@ import React from "react";
 import { Baby,Logs } from 'lucide-react';
 import Link from "next/link";
 import { Button } from "./ui/button";
-import ResponsiveMenu from "./responsiveMenu";
+import ResponsiveMenu from "./responsiveMenu"; 
+import { useAppSelector } from "@/lib/store/hooks";
 
 
 const Navbar = () => {
+  const {user,isAuthenticated} = useAppSelector((state:any) => state.auth)
+  console.log(user, isAuthenticated)
   const NavbarMenu = [
     {
       id: 1,

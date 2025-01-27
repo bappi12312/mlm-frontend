@@ -89,7 +89,7 @@ const Login = () => {
 
     // Trigger the action with the payload
    const response = await action(payload as any).unwrap();
-   toast.success(response?.message || "Signup successful. You can now log in.");
+  //  toast.success(response?.message || "Signup successful. You can now log in.");
   };
 
   useEffect(() => {
@@ -101,7 +101,6 @@ const Login = () => {
       toast.success(
         registerData?.message || "Signup successful. You can now log in."
       );
-      router.push("/")
     } else if (registerError) {
       // Check if the error is of type FetchBaseQueryError
       if ("data" in registerError) {
@@ -115,7 +114,7 @@ const Login = () => {
 
     if (loginIsSuccess) {
       toast.success(loginData?.message || "Login successful.");
-      router.push("/dashboard"); // Redirect after login
+      router.push("/login"); // Redirect after login
     } else if (loginError) {
       // Check if the error is of type FetchBaseQueryError
       if ("data" in loginError) {

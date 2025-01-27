@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 
 interface User {
   name: string;
@@ -19,7 +18,6 @@ interface User {
   updatedAt: string;
 }
 
-
 interface UserState {
   user: User | null;
   accessToken?: string | null;
@@ -29,59 +27,68 @@ interface UserState {
   isAuthenticated: boolean;
 }
 
-const initialState: UserState = {
-  user: null,
-  accessToken: Cookies.get("accessToken") || null,
-  refreshToken: Cookies.get("refreshToken") || null,
-  loading: false,
-  error: null,
-  isAuthenticated: false,
+const loadStateFromCookies = (): UserState  => {
+  const accessToken = Cookies.get("accessToken");
+  const refreshToken = Cookies.get("refreshToken");
+  const user = Cookies.get("user");
+
+  return {
+    user: user ? JSON.parse(user) : null,
+    accessToken: accessToken || null,
+    refreshToken: refreshToken || null,
+    loading: false,
+    error: null,
+    isAuthenticated: !!accessToken,
+  };
 };
 
-interface userLoggedInPayload {
+const initialState: UserState = loadStateFromCookies();
+
+interface UserLoggedInPayload {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
 }
-// export interface AuthState {
-//   isAuthenticated: boolean;
-//   user: any;
-// }
 
 const authSlice = createSlice({
-  name: "authSlice",
+  name: "auth",
   initialState,
   reducers: {
-    userLoggedIn: (state, action: PayloadAction<userLoggedInPayload>) => {
-      state.user = action.payload.user || null;
-      state.accessToken = action.payload.accessToken || null;
-      state.refreshToken = action.payload.refreshToken || null;
+    userLoggedIn: (state, action: PayloadAction<UserLoggedInPayload>) => {
+      const { user, accessToken, refreshToken } = action.payload;
+
+      state.user = user;
+      state.accessToken = accessToken;
+      state.refreshToken = refreshToken;
       state.isAuthenticated = true;
 
-      Cookies.set("accessToken", action.payload.accessToken || "");
-      Cookies.set("refreshToken", action.payload.refreshToken || "");
-    },
-    userLoggedOut: (state) => {
-      Object.assign(state, initialState);
+      if (accessToken) {
+        Cookies.set("accessToken", accessToken, { secure: true, sameSite: "strict" });
+      }
 
+      if (refreshToken) {
+        Cookies.set("refreshToken", refreshToken, { secure: true, sameSite: "strict" });
+      }
+
+      if (user) {
+        Cookies.set("user", JSON.stringify(user), { secure: true, sameSite: "strict" });
+      }
+    },
+    userLoggedOut: () => {
       Cookies.remove("accessToken");
       Cookies.remove("refreshToken");
-
-      // redirect to login page
-      const navigate = useRouter()
-      navigate.push("/login")
+      Cookies.remove("user");
+      return { ...initialState, isAuthenticated: false };
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    setError(state, action: PayloadAction<string | null>) {
+    setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    resetState: (state) => {
-      Object.assign(state, initialState);
-    },
+    resetState: () => initialState,
   },
 });
 
-export const { userLoggedIn, userLoggedOut,setError,setLoading,resetState } = authSlice.actions;
+export const { userLoggedIn, userLoggedOut, setLoading, setError, resetState } = authSlice.actions;
 export default authSlice.reducer;

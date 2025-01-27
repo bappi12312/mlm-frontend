@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "../authSlice";
 import { RootState } from "../../store";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import Cookies from "js-cookie";
 
 interface User {
@@ -20,23 +20,24 @@ interface User {
   createdAt: string;
   updatedAt: string;
 }
-interface RegisterResponse {
+
+interface LoginData {
   user: User;
-  message: string; // Add the message property
+  accessToken: string;
+  refreshToken: string;
 }
 
 interface LoginResponse {
-  user: User | null;
-  accessToken: string;
-  refreshToken: string;
-  message: string; // Add the message property
+  statusCode: number;
+  data?: LoginData;
+  message: string;
+  success: boolean;
 }
 
 interface UpdateResponse {
   user: User;
   message?: string;
 }
-// const USER_API = "https://mlm-sebsite-backend.onrender.com/api/v1/users/";
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const state = api.getState() as RootState;
@@ -65,18 +66,18 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
           if (refreshResult.data) {
             const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-              refreshResult.data as LoginResponse;
+              (refreshResult.data as LoginResponse).data || {};
 
             api.dispatch(
               userLoggedIn({
                 user: state.auth.user,
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken,
+                accessToken: newAccessToken || "",
+                refreshToken: newRefreshToken || "",
               })
             );
 
-            Cookies.set("accessToken", newAccessToken, { secure: true, sameSite: "strict" });
-            Cookies.set("refreshToken", newRefreshToken, { secure: true, sameSite: "strict" });
+            Cookies.set("accessToken", newAccessToken || "", { secure: true, sameSite: "strict" });
+            Cookies.set("refreshToken", newRefreshToken || "", { secure: true, sameSite: "strict" });
 
             args.headers.set("authorization", `Bearer ${newAccessToken}`);
           } else {
@@ -98,15 +99,14 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   })(args, api, extraOptions);
 };
 
-
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery:baseQueryWithReauth,
-  tagTypes: ["User", "Payment", "Stats"], // Add the User tag type for caching
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ["User", "Payment", "Stats"],
   endpoints: (builder) => ({
     registerUser: builder.mutation<
-      RegisterResponse,
-      { name: string; email: string; password: string; referredBy: string; }
+      { user: User; message: string },
+      { name: string; email: string; password: string; referredBy: string }
     >({
       query: (credentials) => ({
         url: "register",
@@ -127,20 +127,20 @@ export const authApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
-          const user = result.data?.user;
+          const user = result.data?.data?.user;
 
           if (user) {
             dispatch(
               userLoggedIn({
                 user: {
                   ...user,
-                  referalCode: user.referalCode || "", // Default values for missing fields
+                  referalCode: user.referalCode || "",
                   earnings: user.earnings || 0,
                   directRecruit: user.directRecruit || 0,
                   photo: user.photo || "",
                 },
-                accessToken: result.data.accessToken,
-                refreshToken: result.data.refreshToken || "", // No accessToken in this query
+                accessToken: result.data.data?.accessToken || "",
+                refreshToken: result.data.data?.refreshToken || "",
               })
             );
           }
@@ -177,20 +177,20 @@ export const authApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
-          const user = result.data?.user;
+          const user = result.data?.data?.user;
 
           if (user) {
             dispatch(
               userLoggedIn({
                 user: {
                   ...user,
-                  referalCode: user.referalCode || "", // Default values for missing fields
+                  referalCode: user.referalCode || "",
                   earnings: user.earnings || 0,
                   directRecruit: user.directRecruit || 0,
                   photo: user.photo || "",
                 },
-                accessToken: result.data.accessToken || "",
-                refreshToken: result.data.refreshToken || "", // No accessToken in this query
+                accessToken: result.data.data?.accessToken || "",
+                refreshToken: result.data.data?.refreshToken || "",
               })
             );
           }
