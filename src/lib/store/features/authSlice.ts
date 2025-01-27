@@ -1,5 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
+import { redirect } from "next/navigation";
+// import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface User {
   name: string;
@@ -78,7 +81,10 @@ const authSlice = createSlice({
       Cookies.remove("accessToken");
       Cookies.remove("refreshToken");
       Cookies.remove("user");
+      toast.success("Logged out successfully");
+      redirect("/login")
       return { ...initialState, isAuthenticated: false };
+      
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;

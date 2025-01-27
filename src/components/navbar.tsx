@@ -7,12 +7,15 @@ import ResponsiveMenu from "./responsiveMenu";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { userLoggedOut } from "@/lib/store/features/authSlice";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const { user, isAuthenticated } = useAppSelector((state: any) => state.auth);
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const handleLogout = () => {
     dispatch(userLoggedOut());
+    router.push("/login");
   };
 
   const NavbarMenu = [
@@ -99,7 +102,7 @@ const Navbar = () => {
         </div>
       </nav>
       {/* mobile menu section */}
-      <ResponsiveMenu open={open} setOpen={setOpen} />
+      <ResponsiveMenu open={open} setOpen={setOpen} isAuthenticated={isAuthenticated}/>
     </div>
   );
 };

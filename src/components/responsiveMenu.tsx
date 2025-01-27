@@ -1,12 +1,12 @@
-import React from 'react'
 import{motion,AnimatePresence} from "framer-motion"
 import Link from 'next/link';
 interface ResponsiveMenuProps {
   open: boolean;
-  setOpen: Function
+  setOpen: Function;
+  isAuthenticated: boolean;
 }
 
-const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ( {open,setOpen}) => {
+const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ( {open,setOpen,isAuthenticated}) => {
   const NavbarMenu = [
     {
       id: 1,
@@ -17,13 +17,17 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ( {open,setOpen}) => {
       id: 2,
       title: "Dashboard",
       link: "/dashboard",
+      showWhen: isAuthenticated,
     },
     {
       id: 3,
       title: "login",
       link: "/login",
+      showWhen: !isAuthenticated,
     },
   ];
+
+
   return (
     <AnimatePresence mode='wait'>
       {
@@ -37,11 +41,13 @@ const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ( {open,setOpen}) => {
             <div>
           <ul className='uppercase space-y-4'>
             {
-              NavbarMenu?.map((item) => (
-                <li key={item?.id}>
-              <Link onClick={() => setOpen(!open)}  href={item.link}>{item?.title}</Link>
-            </li>
-              ))
+              NavbarMenu?.filter((item) => item?.showWhen !== false).map(
+                (item) => (
+                  <li key={item?.id}>
+                  <Link onClick={() => setOpen(!open)}  href={item.link}>{item?.title}</Link>
+                </li>
+                )
+              )
             }
           </ul>
             </div>
