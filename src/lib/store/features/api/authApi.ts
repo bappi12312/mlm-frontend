@@ -41,7 +41,7 @@ interface UpdateResponse {
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const state = api.getState() as RootState;
-  let accessToken = state.auth.accessToken || Cookies.get("accessToken");
+  const accessToken = state.auth.accessToken || Cookies.get("accessToken");
 
   if (accessToken) {
     const decoded: any = jwtDecode(accessToken);

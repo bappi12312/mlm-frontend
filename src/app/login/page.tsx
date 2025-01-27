@@ -67,7 +67,7 @@ const Login = () => {
     }
   };
 
-  const handleRegistration = async (type: String) => {
+  const handleRegistration = async (type: string) => {
     const inputData: { [key: string]: string } =
       type === "signup" ? signupInput : loginInput;
 
@@ -88,7 +88,7 @@ const Login = () => {
     const action = type === "signup" ? registerUser : loginUser;
 
     // Trigger the action with the payload
-   const response = await action(payload as any).unwrap();
+   await action(payload as any).unwrap();
   //  toast.success(response?.message || "Signup successful. You can now log in.");
   };
 
