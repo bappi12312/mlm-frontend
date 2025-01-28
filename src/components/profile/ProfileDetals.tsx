@@ -66,7 +66,7 @@ const ProfileDetals = () => {
 
             <div className="flex items-center mt-4 text-gray-200">
               <h1 className="px-2 text-sm">{user && user.status}</h1>
-              <h2>{user && user.status === "active" ? "🟢" : "🔴"}</h2>
+              <h2>{user && user.status === "Active" ? "🟢" : "🔴"}</h2>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
@@ -153,7 +153,7 @@ const ProfileDetals = () => {
             </form>
           </div>
 
-          {user && user.status === "active" && Number(user.earnings) > 0 && (
+          {user && user.status === "Active" && Number(user.earnings) > 0 && (
             <PaymentRequested />
           )}
         </div>
