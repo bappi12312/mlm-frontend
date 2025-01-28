@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAppSelector } from "@/lib/store/hooks";
 import { UserCheck, UserRoundPen,BarChart  } from 'lucide-react';
+import ProfileDetals from "@/components/profile/ProfileDetals";
 
 
 
@@ -50,7 +51,8 @@ const AdminPage = () => {
 						)
 					}
 				</div>
-				{/* {activeTab === "create" && <CreateProductForm />}
+				{activeTab === "profile" && <ProfileDetals />}
+				{/* {activeTab === "create" && }
 				{activeTab === "products" && <ProductsList />}
 				{activeTab === "analytics" && <AnalyticsTab />} */}
 			</div>
