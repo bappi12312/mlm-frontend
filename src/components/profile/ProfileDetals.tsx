@@ -3,7 +3,6 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 
-// "use client"
 type Inputs = {
   FromNumber: number;
   ToNumber: number;
@@ -18,20 +17,20 @@ const ProfileDetals = () => {
     formState: { errors },
   } = useForm<Inputs>();
 
-  const [paymentCreation, { data, isLoading, isSuccess, error }] =
+  const [paymentCreation] =
     usePaymentCreationMutation();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log(data);
-    const result =  await paymentCreation(data).unwrap();
-      toast.success(result?.message||"your response submitted successfully please wait for admin confirmation. your account will be active soon");
+      const result = await paymentCreation(data).unwrap();
+      toast.success(
+        result?.message ||
+          "your response submitted successfully please wait for admin confirmation. your account will be active soon"
+      );
     } catch (error) {
-      console.log(error); 
+      console.log(error);
       toast.error("your response submitted failed");
     }
   };
-
-
   return (
     <div className="w-full h-full flex justify-center items-center flex-col gap-8">
       <div className="w-full md:w-1/2 bg-gray-800 rounded-lg">

@@ -42,7 +42,6 @@ interface UpdateResponse {
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const state = api.getState() as RootState;
   const accessToken = state.auth.accessToken || Cookies.get("accessToken");
-  console.log(accessToken);
   
 
   // Check if the access token exists
