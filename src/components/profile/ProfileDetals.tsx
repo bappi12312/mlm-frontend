@@ -4,7 +4,7 @@ import { useAppSelector } from "@/lib/store/hooks";
 const ProfileDetals = () => {
   const { user } = useAppSelector((state) => state.auth);
   return (
-    <div className="w-full h-full flex justify-center items-center">
+    <div className="w-full h-full flex justify-center items-center flex-col gap-8">
       <div className="w-full md:w-1/2 bg-gray-800 rounded-lg">
         <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800">
           <img
@@ -56,6 +56,36 @@ const ProfileDetals = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="w-full md:w-1/2  rounded-lg space-y-8">
+            <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1 text-center">
+              <h1>To Active Your Account please invest just 100 Taka to the given number : </h1>
+              <div>
+                <h2>Bkash: 01795944731</h2>
+                <h2>nogod: 01795944731</h2>
+                <h2>rocket: 01795944731</h2>
+              </div>
+            </div>
+
+            {/* inves form */}
+            <div>
+              <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1">
+                <h1 className="text-center font-bold text-xl md:text-2xl">After successfully invest  please fill this form: </h1>
+              </div>
+              <div>
+                <form className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1">
+                  <div className="flex flex-col gap-4">
+                    <input type="number" placeholder="From Number" className="w-full p-2 bg-gray-700 rounded-lg" />
+                    <input type="number" placeholder="To Number" className="w-full p-2 bg-gray-700 rounded-lg" />
+                    <input type="number" placeholder="Amount" className="w-full p-2 bg-gray-700 rounded-lg" />
+                    <input type="text" placeholder="Enter your transaction id" className="w-full p-2 bg-gray-700 rounded-lg" />
+                  </div>
+                  <div className="flex justify-center">
+                    <button className="px-4 py-2 mt-4 text-white bg-green-500 rounded-lg hover:bg-green-600">Submit</button>
+                  </div>
+                </form>
+              </div>
+            </div>
       </div>
     </div>
   );
