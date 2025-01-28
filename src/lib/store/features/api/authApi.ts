@@ -279,7 +279,7 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    requestPayment: builder.mutation({
+    requestPayment: builder.mutation<{ message: string }, {type: string; number: number; confirmNumber: number}>({
       query: (body) => ({
         url: "paymentRequest",
         method: "POST",

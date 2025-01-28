@@ -2,6 +2,7 @@ import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
+import PaymentRequested from "./PaymentRequested";
 
 type Inputs = {
   FromNumber: number;
@@ -17,8 +18,9 @@ const ProfileDetals = () => {
     formState: { errors },
   } = useForm<Inputs>();
 
-  const [paymentCreation] =
-    usePaymentCreationMutation();
+
+
+  const [paymentCreation] = usePaymentCreationMutation();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       const result = await paymentCreation(data).unwrap();
@@ -150,6 +152,10 @@ const ProfileDetals = () => {
               </div>
             </form>
           </div>
+
+          {user && user.status === "active" && Number(user.earnings) > 0 && (
+            <PaymentRequested />
+          )}
         </div>
       </div>
     </div>
