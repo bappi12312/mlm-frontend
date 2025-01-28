@@ -42,13 +42,23 @@ interface UpdateResponse {
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const state = api.getState() as RootState;
   const accessToken = state.auth.accessToken || Cookies.get("accessToken");
+  console.log(accessToken);
+  
 
+  // Check if the access token exists
   if (accessToken) {
+    args.headers = args.headers || new Headers();
+    args.headers.set("authorization", `Bearer ${accessToken}`);
     const decoded: any = jwtDecode(accessToken);
+    
     const currentTime = Math.floor(Date.now() / 1000);
+    
 
+    // If token expires within 5 minutes, refresh it
     if (decoded.exp - currentTime < 300) {
       const refreshToken = Cookies.get("refreshToken");
+      console.log(refreshToken);
+      
 
       if (refreshToken) {
         try {
@@ -56,7 +66,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
           })(
             {
-              url: "refresh-access-token",
+              url: "refresh-token",
               method: "POST",
               body: { refreshToken },
             },
@@ -68,6 +78,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
               (refreshResult.data as LoginResponse).data || {};
 
+            // Update state and cookies with new tokens
             api.dispatch(
               userLoggedIn({
                 user: state.auth.user,
@@ -79,11 +90,14 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             Cookies.set("accessToken", newAccessToken || "", { secure: true, sameSite: "strict" });
             Cookies.set("refreshToken", newRefreshToken || "", { secure: true, sameSite: "strict" });
 
+            args.headers = args.headers || new Headers();
             args.headers.set("authorization", `Bearer ${newAccessToken}`);
           } else {
             throw new Error("Token refresh failed");
           }
         } catch (error) {
+          api.dispatch(userLoggedOut());
+          console.error("Token refresh error:", error);
           api.dispatch(userLoggedOut());
           return { error: { status: 401, message: "Unauthorized" } };
         }
@@ -94,10 +108,21 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     }
   }
 
-  return fetchBaseQuery({
+  // If the access token is not expired, add it to the headers
+
+  // Perform the original request with the (possibly updated) headers
+  const response = await fetchBaseQuery({
     baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
   })(args, api, extraOptions);
+
+  if (response.error && response.error.status === 401) {
+    console.error("Unauthorized request:", response.error.data);
+    api.dispatch(userLoggedOut());
+  }
+
+  return response;
 };
+
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -207,7 +232,10 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    paymentCreation: builder.mutation({
+    paymentCreation: builder.mutation <
+    { message: string },
+    { FromNumber: number; ToNumber: number; Amount: number }
+    >({
       query: (credentials) => ({
         url: "payment-creation",
         method: "POST",
