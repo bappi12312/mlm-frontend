@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "../authSlice";
 import { RootState } from "../../store";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
 
 interface User {
@@ -42,22 +42,20 @@ interface UpdateResponse {
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const state = api.getState() as RootState;
   const accessToken = state.auth.accessToken || Cookies.get("accessToken");
-  
 
   // Check if the access token exists
   if (accessToken) {
-    args.headers = args.headers || new Headers();
-    args.headers.set("authorization", `Bearer ${accessToken}`);
+    const headers = new Headers(args.headers);
+    headers.set("authorization", `Bearer ${accessToken}`);
+    args.headers = headers;
     const decoded: any = jwtDecode(accessToken);
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
-    
 
     // If token expires within 5 minutes, refresh it
     if (decoded.exp - currentTime < 300) {
       const refreshToken = Cookies.get("refreshToken");
       console.log(refreshToken);
-      
 
       if (refreshToken) {
         try {
@@ -74,8 +72,10 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
           );
 
           if (refreshResult.data) {
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-              (refreshResult.data as LoginResponse).data || {};
+            const {
+              accessToken: newAccessToken,
+              refreshToken: newRefreshToken,
+            } = (refreshResult.data as LoginResponse).data || {};
 
             // Update state and cookies with new tokens
             api.dispatch(
@@ -86,8 +86,14 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
               })
             );
 
-            Cookies.set("accessToken", newAccessToken || "", { secure: true, sameSite: "strict" });
-            Cookies.set("refreshToken", newRefreshToken || "", { secure: true, sameSite: "strict" });
+            Cookies.set("accessToken", newAccessToken || "", {
+              secure: true,
+              sameSite: "strict",
+            });
+            Cookies.set("refreshToken", newRefreshToken || "", {
+              secure: true,
+              sameSite: "strict",
+            });
 
             args.headers = args.headers || new Headers();
             args.headers.set("authorization", `Bearer ${newAccessToken}`);
@@ -102,7 +108,9 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
         }
       } else {
         api.dispatch(userLoggedOut());
-        return { error: { status: 401, message: "No refresh token available" } };
+        return {
+          error: { status: 401, message: "No refresh token available" },
+        };
       }
     }
   }
@@ -121,7 +129,6 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
   return response;
 };
-
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -231,9 +238,9 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    paymentCreation: builder.mutation <
-    { message: string },
-    { FromNumber: number; ToNumber: number; Amount: number }
+    paymentCreation: builder.mutation<
+      { message: string },
+      { FromNumber: number; ToNumber: number; Amount: number }
     >({
       query: (credentials) => ({
         url: "payment-creation",
@@ -271,15 +278,21 @@ export const authApi = createApi({
       }),
       providesTags: ["User"],
     }),
-    distributeCommission: builder.mutation({
-      query: (body) => ({
+    distributeCommission: builder.mutation<
+      { message: string },
+      { amount: number }
+    >({
+      query: (amount) => ({
         url: "distribute-commision",
         method: "PATCH",
-        body,
+        body: { amount: amount.amount },
       }),
       invalidatesTags: ["User"],
     }),
-    requestPayment: builder.mutation<{ message: string }, {type: string; number: number; confirmNumber: number}>({
+    requestPayment: builder.mutation<
+      { message: string },
+      { type: string; number: number; confirmNumber: number }
+    >({
       query: (body) => ({
         url: "paymentRequest",
         method: "POST",

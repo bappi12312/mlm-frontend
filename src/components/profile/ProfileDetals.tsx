@@ -3,6 +3,7 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import PaymentRequested from "./PaymentRequested";
+import PaymentDistribution from "./PaymentDistribution";
 
 type Inputs = {
   FromNumber: number;
@@ -156,6 +157,12 @@ const ProfileDetals = () => {
           {user && user.status === "Active" && Number(user.earnings) > 0 && (
             <PaymentRequested />
           )}
+
+          {
+            user && user.status === "Active" && (
+              <PaymentDistribution />
+            )
+          }
         </div>
       </div>
     </div>
