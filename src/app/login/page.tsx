@@ -1,24 +1,15 @@
 "use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  useLoginUserMutation,
-  useRegisterUserMutation,
-} from "@/lib/store/features/api/authApi";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLoginUserMutation, useRegisterUserMutation } from "@/lib/store/features/api/authApi";
 
 interface APIError {
   message?: string;
@@ -29,7 +20,7 @@ type SignupInput = {
   name: string;
   email: string;
   password: string;
-  referredBy: string; // Make it required
+  referredBy: string;
 };
 
 interface LoginInput {
@@ -40,38 +31,13 @@ interface LoginInput {
 type AuthTab = "signup" | "login";
 
 const Login = () => {
-  const [signupInput, setSignupInput] = useState<SignupInput>({
-    name: "",
-    email: "",
-    password: "",
-    referredBy: "",
-  });
-  
-  const [loginInput, setLoginInput] = useState<LoginInput>({ 
-    email: "", 
-    password: "" 
-  });
+  const [tab, setTab] = useState<AuthTab>("login");
+  const [signupInput, setSignupInput] = useState<SignupInput>({ name: "", email: "", password: "", referredBy: "" });
+  const [loginInput, setLoginInput] = useState<LoginInput>({ email: "", password: "" });
 
-  const [
-    registerUser,
-    { 
-      data: registerData, 
-      error: registerError, 
-      isLoading: registerIsLoading, 
-      isSuccess: registerIsSuccess 
-    },
-  ] = useRegisterUserMutation();
-  
-  const [
-    loginUser,
-    { 
-      data: loginData, 
-      error: loginError, 
-      isLoading: loginIsLoading, 
-      isSuccess: loginIsSuccess 
-    },
-  ] = useLoginUserMutation();
-  
+  const [registerUser, { data: registerData, error: registerError, isLoading: registerIsLoading, isSuccess: registerIsSuccess }] = useRegisterUserMutation();
+  const [loginUser, { data: loginData, error: loginError, isLoading: loginIsLoading, isSuccess: loginIsSuccess }] = useLoginUserMutation();
+
   const router = useRouter();
 
   const handleInputChange = (
@@ -79,17 +45,11 @@ const Login = () => {
     type: AuthTab
   ) => {
     const { name, value } = e.target;
-    
+
     if (type === "signup") {
-      setSignupInput(prev => ({
-        ...prev,
-        [name]: value as SignupInput[keyof SignupInput]
-      }));
+      setSignupInput((prev) => ({ ...prev, [name]: value }));
     } else {
-      setLoginInput(prev => ({
-        ...prev,
-        [name]: value as LoginInput[keyof LoginInput]
-      }));
+      setLoginInput((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -97,103 +57,77 @@ const Login = () => {
     try {
       if (type === "signup") {
         const { name, email, password } = signupInput;
-        if (!name || !email || !password) {
-          return toast.error("All fields are required for signup.");
-        }
+        if (!name || !email || !password) return toast.error("All fields are required for signup.");
         await registerUser(signupInput).unwrap();
       } else {
         const { email, password } = loginInput;
-        if (!email || !password) {
-          return toast.error("Email and password are required for login.");
-        }
+        if (!email || !password) return toast.error("Email and password are required for login.");
         await loginUser(loginInput).unwrap();
       }
     } catch (error) {
-      const errorMessage = (error as APIError)?.message || 
-        `Failed to ${type === "signup" ? "sign up" : "log in"}`;
+      const errorMessage = (error as APIError)?.message || `Failed to ${type}`;
       toast.error(errorMessage);
     }
   };
 
   useEffect(() => {
-    if (registerIsSuccess) {
-      setLoginInput({
-        email: signupInput.email,
-        password: signupInput.password,
-      });
-      toast.success(registerData?.message || "Signup successful. Please log in.");
+    if (registerIsSuccess && registerData) {
+      setLoginInput({ email: signupInput.email, password: signupInput.password });
+      toast.success(registerData.message || "Signup successful. Please log in.");
     }
-  }, [registerIsSuccess, signupInput.email, signupInput.password, registerData?.message]);
+  }, [registerIsSuccess, signupInput, registerData]);
 
   useEffect(() => {
-    if (loginIsSuccess) {
-      toast.success(loginData?.message || "Login successful.");
-      router.push("/dashboard"); // Changed to sensible redirect
+    if (loginIsSuccess && loginData) {
+      toast.success(loginData.message || "Login successful.");
+      router.push("/dashboard");
     }
-  }, [loginIsSuccess, router, loginData?.message]);
+  }, [loginIsSuccess, router, loginData]);
 
   useEffect(() => {
     const error = registerError || loginError;
-    if (error) {
-      const errorData = 'data' in error ? error.data as APIError : undefined;
+    if (error && "data" in error) {
+      const errorData = error.data as APIError;
       toast.error(errorData?.message || "An error occurred");
     }
   }, [registerError, loginError]);
 
   return (
     <div className="flex items-center w-full justify-center mt-20">
-      <Tabs defaultValue="login" className="w-[400px]">
+      <Tabs value={tab} onValueChange={(value) => setTab(value as AuthTab)} className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Signup</TabsTrigger>
           <TabsTrigger value="login">Login</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="signup">
           <Card>
             <CardHeader>
               <CardTitle>Signup</CardTitle>
-              <CardDescription>
-                Create a new account and click signup when you're done.
-              </CardDescription>
+              <CardDescription>Create a new account and click signup when you're done.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(signupInput).map(([key, value]) => (
                 <div key={key} className="space-y-1">
                   <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
-                  <Input
-                    type={key === "password" ? "password" : "text"}
-                    name={key}
-                    value={value}
-                    onChange={(e) => handleInputChange(e, "signup")}
-                    placeholder={key === "referredBy" ? "Optional referral code" : key}
-                    required={key !== "referredBy"}
-                  />
+                  <Input type={key === "password" ? "password" : "text"} name={key} value={value} onChange={(e) => handleInputChange(e, "signup")} required={key !== "referredBy"} />
                 </div>
               ))}
             </CardContent>
             <CardFooter>
-              <Button
-                disabled={registerIsLoading}
-                onClick={() => handleAuthSubmit("signup")}
-              >
-                {registerIsLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                    Please wait
-                  </>
-                ) : "Signup"}
+              <Button disabled={registerIsLoading} onClick={() => handleAuthSubmit("signup")}>
+                {registerIsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Signup"}
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
 
-        <TabsContent value="login">
+          {/* ✅ Login Tab */}
+          <TabsContent value="login">
           <Card>
             <CardHeader>
               <CardTitle>Login</CardTitle>
-              <CardDescription>
-                Enter your credentials to access your account.
-              </CardDescription>
+              <CardDescription>Enter your credentials to access your account.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(loginInput).map(([key, value]) => (
@@ -211,16 +145,8 @@ const Login = () => {
               ))}
             </CardContent>
             <CardFooter>
-              <Button
-                disabled={loginIsLoading}
-                onClick={() => handleAuthSubmit("login")}
-              >
-                {loginIsLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
-                  </>
-                ) : "Login"}
+              <Button disabled={loginIsLoading} onClick={() => handleAuthSubmit("login")}>
+                {loginIsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Login"}
               </Button>
             </CardFooter>
           </Card>
