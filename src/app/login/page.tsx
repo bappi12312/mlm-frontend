@@ -104,7 +104,7 @@ const Login = () => {
           <Card>
             <CardHeader>
               <CardTitle>Signup</CardTitle>
-              <CardDescription>Create a new account and click signup when you're done.</CardDescription>
+              <CardDescription>Create a new account and click signup when youre done</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(signupInput).map(([key, value]) => (
@@ -127,7 +127,7 @@ const Login = () => {
           <Card>
             <CardHeader>
               <CardTitle>Login</CardTitle>
-              <CardDescription>Enter your credentials to access your account.</CardDescription>
+              <CardDescription>Enter your credentials to access your account</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(loginInput).map(([key, value]) => (

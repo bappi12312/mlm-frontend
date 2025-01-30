@@ -64,7 +64,9 @@ const authSlice = createSlice({
         isAuthenticated: true
       };
     },
-    userLoggedOut: (_) => {
+    userLoggedOut: (state) => {
+      // Clear state
+      
       // Clear cookies only on client side
       if (typeof window !== 'undefined') {
         Cookies.remove("accessToken");
@@ -73,9 +75,12 @@ const authSlice = createSlice({
       }
       
       return {
-        ...initialState,
+        ...state,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
         isAuthenticated: false
-      };
+      }
     },
     // ... other reducers
   },

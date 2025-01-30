@@ -50,10 +50,10 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (
   args: string | FetchArgs,
   api: BaseQueryApi,
-  extraOptions: {}
+  extraOptions: Record<string, unknown>
 ) => {
   const state = api.getState() as RootState;
-  let accessToken = state.auth.accessToken || Cookies.get("accessToken");
+  const accessToken = state.auth.accessToken || Cookies.get("accessToken");
 
   // Normalize the request arguments
   const requestArgs: FetchArgs = typeof args === 'string' 
@@ -106,7 +106,7 @@ const baseQueryWithReauth = async (
               // Update state and cookies with new tokens
               api.dispatch(
                 userLoggedIn({
-                  user: state.auth.user,
+                  user: state.auth.user || {} as User,
                   accessToken: newAccessToken,
                   refreshToken: newRefreshToken,
                 })
