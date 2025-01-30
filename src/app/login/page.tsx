@@ -23,73 +23,96 @@ import { toast } from "sonner";
 interface APIError {
   message?: string;
   data?: string;
-  [key: string]: any; // Allow additional properties if needed
 }
 
+type SignupInput = {
+  name: string;
+  email: string;
+  password: string;
+  referredBy: string; // Make it required
+};
+
+interface LoginInput {
+  email: string;
+  password: string;
+}
+
+type AuthTab = "signup" | "login";
+
 const Login = () => {
-  const [signupInput, setSignupInput] = useState({
+  const [signupInput, setSignupInput] = useState<SignupInput>({
     name: "",
     email: "",
     password: "",
     referredBy: "",
   });
-  const [loginInput, setLoginInput] = useState({ email: "", password: "" });
+  
+  const [loginInput, setLoginInput] = useState<LoginInput>({ 
+    email: "", 
+    password: "" 
+  });
 
   const [
     registerUser,
-    {
-      data: registerData,
-      error: registerError,
-      isLoading: registerIsLoading,
-      isSuccess: registerIsSuccess,
+    { 
+      data: registerData, 
+      error: registerError, 
+      isLoading: registerIsLoading, 
+      isSuccess: registerIsSuccess 
     },
   ] = useRegisterUserMutation();
+  
   const [
     loginUser,
-    {
-      data: loginData,
-      error: loginError,
-      isLoading: loginIsLoading,
-      isSuccess: loginIsSuccess,
+    { 
+      data: loginData, 
+      error: loginError, 
+      isLoading: loginIsLoading, 
+      isSuccess: loginIsSuccess 
     },
   ] = useLoginUserMutation();
+  
   const router = useRouter();
 
-  const changeInputHandler = (
+  const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: string
+    type: AuthTab
   ) => {
     const { name, value } = e.target;
+    
     if (type === "signup") {
-      setSignupInput({ ...signupInput, [name]: value });
+      setSignupInput(prev => ({
+        ...prev,
+        [name]: value as SignupInput[keyof SignupInput]
+      }));
     } else {
-      setLoginInput({ ...loginInput, [name]: value });
+      setLoginInput(prev => ({
+        ...prev,
+        [name]: value as LoginInput[keyof LoginInput]
+      }));
     }
   };
 
-  const handleRegistration = async (type: string) => {
-    const inputData: { [key: string]: string } =
-      type === "signup" ? signupInput : loginInput;
-
-    if (
-      type === "signup" &&
-      (!inputData.name || !inputData.email || !inputData.password)
-    ) {
-      return toast.error("All fields are required for signup.");
+  const handleAuthSubmit = async (type: AuthTab) => {
+    try {
+      if (type === "signup") {
+        const { name, email, password } = signupInput;
+        if (!name || !email || !password) {
+          return toast.error("All fields are required for signup.");
+        }
+        await registerUser(signupInput).unwrap();
+      } else {
+        const { email, password } = loginInput;
+        if (!email || !password) {
+          return toast.error("Email and password are required for login.");
+        }
+        await loginUser(loginInput).unwrap();
+      }
+    } catch (error) {
+      const errorMessage = (error as APIError)?.message || 
+        `Failed to ${type === "signup" ? "sign up" : "log in"}`;
+      toast.error(errorMessage);
     }
-
-    if (type === "login" && (!inputData.email || !inputData.password)) {
-      return toast.error("Email and password are required for login.");
-    }
-
-    // Add `name` only if type is "login"
-    const payload = type === "signup" ? inputData : { ...inputData, name: "" };
-
-    const action = type === "signup" ? registerUser : loginUser;
-
-    // Trigger the action with the payload
-   await action(payload as any).unwrap();
-  //  toast.success(response?.message || "Signup successful. You can now log in.");
   };
 
   useEffect(() => {
@@ -98,34 +121,24 @@ const Login = () => {
         email: signupInput.email,
         password: signupInput.password,
       });
-      toast.success(
-        registerData?.message || "Signup successful. You can now log in."
-      );
-    } else if (registerError) {
-      // Check if the error is of type FetchBaseQueryError
-      if ("data" in registerError) {
-        const errorData = registerError.data as APIError;
-        toast.error(errorData?.message || "Signup Failed");
-      } else {
-        // Handle other types of errors (e.g., SerializedError)
-        toast.error("An unexpected error occurred during signup.");
-      }
+      toast.success(registerData?.message || "Signup successful. Please log in.");
     }
+  }, [registerIsSuccess, signupInput.email, signupInput.password, registerData?.message]);
 
+  useEffect(() => {
     if (loginIsSuccess) {
       toast.success(loginData?.message || "Login successful.");
-      router.push("/login"); // Redirect after login
-    } else if (loginError) {
-      // Check if the error is of type FetchBaseQueryError
-      if ("data" in loginError) {
-        const errorData = loginError.data as APIError;
-        toast.error(errorData?.message || "Login Failed");
-      } else {
-        // Handle other types of errors (e.g., SerializedError)
-        toast.error("An unexpected error occurred during login.");
-      }
+      router.push("/dashboard"); // Changed to sensible redirect
     }
-  }, [registerIsSuccess, registerError, loginIsSuccess, loginError, router]);
+  }, [loginIsSuccess, router, loginData?.message]);
+
+  useEffect(() => {
+    const error = registerError || loginError;
+    if (error) {
+      const errorData = 'data' in error ? error.data as APIError : undefined;
+      toast.error(errorData?.message || "An error occurred");
+    }
+  }, [registerError, loginError]);
 
   return (
     <div className="flex items-center w-full justify-center mt-20">
@@ -134,6 +147,7 @@ const Login = () => {
           <TabsTrigger value="signup">Signup</TabsTrigger>
           <TabsTrigger value="login">Login</TabsTrigger>
         </TabsList>
+        
         <TabsContent value="signup">
           <Card>
             <CardHeader>
@@ -143,114 +157,70 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  type="text"
-                  name="name"
-                  aria-label="Name"
-                  value={signupInput.name}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="name"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  name="email"
-                  value={signupInput.email}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="@gmail.com"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  name="password"
-                  value={signupInput.password}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="password"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="referredBy">Referral Code</Label>
-                <Input
-                  type="text"
-                  name="referredBy"
-                  value={signupInput?.referredBy}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                  placeholder="Optional referral code"
-                />
-              </div>
+              {Object.entries(signupInput).map(([key, value]) => (
+                <div key={key} className="space-y-1">
+                  <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
+                  <Input
+                    type={key === "password" ? "password" : "text"}
+                    name={key}
+                    value={value}
+                    onChange={(e) => handleInputChange(e, "signup")}
+                    placeholder={key === "referredBy" ? "Optional referral code" : key}
+                    required={key !== "referredBy"}
+                  />
+                </div>
+              ))}
             </CardContent>
             <CardFooter>
               <Button
                 disabled={registerIsLoading}
-                onClick={() => handleRegistration("signup")}
+                onClick={() => handleAuthSubmit("signup")}
               >
                 {registerIsLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
-                    wait
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                    Please wait
                   </>
-                ) : (
-                  "Signup"
-                )}
+                ) : "Signup"}
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
+
         <TabsContent value="login">
           <Card>
             <CardHeader>
               <CardTitle>Login</CardTitle>
               <CardDescription>
-                Login your password here. After signup, you'll be logged in.
+                Enter your credentials to access your account.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <Label htmlFor="current">Email</Label>
-                <Input
-                  type="email"
-                  name="email"
-                  value={loginInput.email}
-                  onChange={(e) => changeInputHandler(e, "login")}
-                  placeholder="Eg. patel@gmail.com"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new">Password</Label>
-                <Input
-                  type="password"
-                  name="password"
-                  value={loginInput.password}
-                  onChange={(e) => changeInputHandler(e, "login")}
-                  placeholder="Eg. xyz"
-                  required
-                />
-              </div>
+              {Object.entries(loginInput).map(([key, value]) => (
+                <div key={key} className="space-y-1">
+                  <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
+                  <Input
+                    type={key === "password" ? "password" : "email"}
+                    name={key}
+                    value={value}
+                    onChange={(e) => handleInputChange(e, "login")}
+                    placeholder={key === "email" ? "example@email.com" : "password"}
+                    required
+                  />
+                </div>
+              ))}
             </CardContent>
             <CardFooter>
               <Button
                 disabled={loginIsLoading}
-                aria-label={loginIsLoading ? "Logging in" : "Login"}
-                onClick={() => handleRegistration("login")}
+                onClick={() => handleAuthSubmit("login")}
               >
                 {loginIsLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
-                    wait
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
                   </>
-                ) : (
-                  "Login"
-                )}
+                ) : "Login"}
               </Button>
             </CardFooter>
           </Card>
