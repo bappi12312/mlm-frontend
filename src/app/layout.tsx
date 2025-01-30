@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/navbar";
-import { StoreProvider } from "./StoreProvider";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { Toaster } from "@/components/ui/sonner";
+import ClientComponents from "./ClientComponents"; // Direct import, no dynamic()
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,12 +29,11 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        <StoreProvider>
-          <Navbar />
+        <ClientComponents>
           {children}
-          <Toaster />
-        </StoreProvider>
+        </ClientComponents>
       </body>
     </html>
   );

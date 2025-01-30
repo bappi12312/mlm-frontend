@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import PaymentRequested from "./PaymentRequested";
 import PaymentDistribution from "./PaymentDistribution";
+import Image from "next/image";
 
 type Inputs = {
   FromNumber: number;
@@ -38,12 +39,11 @@ const ProfileDetals = () => {
     <div className="w-full h-full flex justify-center items-center flex-col gap-8">
       <div className="w-full md:w-1/2 bg-gray-800 rounded-lg">
         <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800">
-          <img
+          <Image
             className="object-cover object-center w-full h-56"
-            src={
-              (user && user.photo) ||
-              "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-            }
+            width={300}
+            height={300}
+            src={user && user.photo || "https://imgs.search.brave.com/m4DXOI6PIc48H-SPuj0r0dPrMAtU6QI_SR1HaGBX3Ak/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9wbGF5/LWxoLmdvb2dsZXVz/ZXJjb250ZW50LmNv/bS90eFpnOERHX2Z1/WURkaGlIMGhhTFlk/NnpIcG9rRnB6WFA5/Z2JfM2xqVkhJOFZl/VnpDa015LVlGWjkt/ZnhYTV9jSHV3bD13/NTI2LWgyOTYtcnc.jpeg"}
             alt="avatar"
           />
 
