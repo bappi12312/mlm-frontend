@@ -21,7 +21,7 @@ const PaymentRequested = () => {
   } = useForm<Inputs>();
 
   // Extract mutation status states
-  const [requestPayment, { isLoading, isError, isSuccess, data }] = useRequestPaymentMutation();
+  const [requestPayment, { isLoading, isError, isSuccess }] = useRequestPaymentMutation();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (data.number !== data.confirmNumber) {
