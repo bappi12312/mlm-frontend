@@ -230,8 +230,8 @@ export const authApi = createApi({
               })
             );
           }
-        } catch (error: any) {
-          console.error("Login error:", error.message || error.data);
+        } catch (error: unknown) {
+          console.error("Load user error:", error instanceof Error ? error.message : error);
         }
       },
     }),
@@ -249,8 +249,8 @@ export const authApi = createApi({
           Cookies.remove("refreshToken");
 
           window.location.href = "/login";
-        } catch (error: any) {
-          console.error("Logout error:", error.message || error.data);
+        } catch (error: unknown) {
+          console.error("Load user error:", error instanceof Error ? error.message : error);
         }
       },
     }),
@@ -280,8 +280,8 @@ export const authApi = createApi({
               })
             );
           }
-        } catch (error: any) {
-          console.error("Load user error:", error.message || error.data);
+        } catch (error: unknown) {
+          console.error("Load user error:", error instanceof Error ? error.message : error);
         }
       },
     }),
