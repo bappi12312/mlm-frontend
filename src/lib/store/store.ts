@@ -3,6 +3,23 @@ import { authApi } from "./features/api/authApi";
 import rootReducer from "./rootReducer";
 import { userLoggedIn } from "./features/authSlice";
 
+interface User {
+  name: string;
+  email: string;
+  role: string;
+  referalCode?: string;
+  referredBy?: string | null;
+  earnings?: number;
+  directRecruit?: number;
+  status: string;
+  photo?: string;
+  downline?: string[];
+  _id: string;
+  transactions?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const makeStore = () => {
   return configureStore({
     reducer: rootReducer,
@@ -19,7 +36,7 @@ const initializeApp = async () => {
       const result = await store.dispatch(authApi.endpoints.loadUser.initiate())
 
       if(result.data?.data?.user) {
-        const user = result.data.data.user
+        const user = result.data.data.user as User;
         const accessToken = result.data.data.accessToken
         const refreshToken = result.data.data.refreshToken
         store.dispatch(
