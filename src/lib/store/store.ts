@@ -1,62 +1,24 @@
+// store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./features/api/authApi";
 import rootReducer from "./rootReducer";
-import { userLoggedIn } from "./features/authSlice";
 
-interface User {
-  name: string;
-  email: string;
-  role: string;
-  referalCode?: string;
-  referredBy?: string | null;
-  earnings?: number;
-  directRecruit?: number;
-  status: string;
-  photo?: string;
-  downline?: string[];
-  _id: string;
-  transactions?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export const makeStore = () => {
+// Explicitly define store type
+export const makeStore = (preloadedState?: Partial<RootState>) => {
   return configureStore({
     reducer: rootReducer,
+    preloadedState,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(authApi.middleware),
     devTools: process.env.NODE_ENV !== "production",
   });
 };
-const store = makeStore();
-const initializeApp = async () => {
-  try {
-    const state = store.getState()
-    if(!state.auth.isAuthenticated) {
-      const result = await store.dispatch(authApi.endpoints.loadUser.initiate())
 
-      if(result.data?.data?.user) {
-        const user = result.data.data.user as User;
-        const accessToken = result.data.data.accessToken
-        const refreshToken = result.data.data.refreshToken
-        store.dispatch(
-          userLoggedIn(
-            {
-              user,
-              accessToken,
-              refreshToken,
-            }
-          )
-        )
-      }
-    }
-  } catch (error) {
-    console.error("Failed to load user:", error);
-  }
-};
-initializeApp();
 
+export type RootState = ReturnType<typeof rootReducer>;
+// First define the type aliases
 export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<AppStore["getState"]>;
 export type AppDispatch = AppStore["dispatch"];
 
+// Then declare the store variable
+export const store = makeStore();

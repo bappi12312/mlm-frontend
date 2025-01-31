@@ -2,9 +2,10 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { StoreProvider } from "./StoreProvider";
 import { Toaster } from "@/components/ui/sonner";
 import NavbarSkeleton from '@/components/NavbarSkeleton';
+import { Providers } from './StoreProvider';
+
 
 // Dynamic import with proper type safety and loading state
 const Navbar = dynamic(() => import("@/components/navbar"), { 
@@ -18,7 +19,7 @@ export default function ClientComponents({
   children: React.ReactNode 
 }) {
   return (
-    <StoreProvider>
+    <Providers>
       <Suspense fallback={<NavbarSkeleton />}>
         <Navbar />
       </Suspense>
@@ -32,6 +33,6 @@ export default function ClientComponents({
           style: { background: '#fff', color: '#000' },
         }}
       />
-    </StoreProvider>
+    </Providers>
   );
 }
