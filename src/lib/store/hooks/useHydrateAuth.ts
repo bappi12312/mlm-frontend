@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { userLoggedIn } from "../features/authSlice";
-import { getAuthFromCookies } from "./useGetAuthFromCookies";
+import { getAuthFromCookies } from "@/lib/utils/cookieUtils";
 
 export function useHydrateAuth() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const hydrateAuth = async () => {
-      const authState = await getAuthFromCookies(); // Fetch cookies on client-side
+      const authState = getAuthFromCookies(); // Fetch cookies on client-side
 
       if (authState.user) {
         dispatch(

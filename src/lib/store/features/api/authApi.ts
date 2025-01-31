@@ -1,5 +1,5 @@
 import { userLoggedIn, userLoggedOut } from "../authSlice";
-import { RootState,AppStore,makeStore } from "../../store";
+import { RootState} from "../../store";
 import Cookies from "js-cookie";
 import { createApi, fetchBaseQuery, FetchArgs, BaseQueryApi } from "@reduxjs/toolkit/query/react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
@@ -32,6 +32,11 @@ interface LoginData {
   refreshToken: string;
 }
 
+interface UpdateResponse {
+  user: User;
+  message?: string;
+}
+
 interface LoginResponse {
   statusCode: number;
   data?: LoginData;
@@ -52,6 +57,8 @@ const baseQueryWithReauth = async (
 
   // Ensure Cookies are accessed only on the client-side
   const accessToken = getAuthFromCookies().accessToken || state.auth.accessToken;
+  console.log(accessToken)
+  console.log(Cookies.get("accessToken"))
 
   const requestArgs: FetchArgs = typeof args === "string" ? { url: args } : { ...args };
   const headers = requestArgs.headers ? normalizeHeaders(requestArgs.headers) : {};
@@ -188,6 +195,84 @@ export const authApi = createApi({
       query: () => ({ url: "profile", method: "GET" }),
       providesTags: ["User"],
     }),
+    updateUser: builder.mutation<UpdateResponse, Partial<User>>({
+      query: (credentials) => ({
+        url: "update-user",
+        method: "PATCH",
+        body: credentials,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    paymentCreation: builder.mutation<
+      { message: string },
+      { FromNumber: number; ToNumber: number; Amount: number }
+    >({
+      query: (credentials) => ({
+        url: "payment-creation",
+        method: "POST",
+        body: credentials,
+      }),
+      invalidatesTags: ["Payment"],
+    }),
+    getAllPayments: builder.query({
+      query: () => ({
+        url: "payments",
+        method: "GET",
+      }),
+      providesTags: ["Payment"],
+    }),
+    getUserStats: builder.query({
+      query: () => ({
+        url: "stats",
+        method: "GET",
+      }),
+      providesTags: ["Stats"],
+    }),
+    changePassword: builder.mutation({
+      query: (credentials) => ({
+        url: "change-password",
+        method: "PATCH",
+        body: credentials,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getAllUsers: builder.query({
+      query: () => ({
+        url: "get-all-users",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    distributeCommission: builder.mutation<
+      { message: string },
+      { amount: number }
+    >({
+      query: (amount) => ({
+        url: "distribute-commision",
+        method: "PATCH",
+        body: { amount: amount.amount },
+      }),
+      invalidatesTags: ["User"],
+    }),
+    requestPayment: builder.mutation<
+      { message: string },
+      { type: string; number: number; confirmNumber: number }
+    >({
+      query: (body) => ({
+        url: "paymentRequest",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    confirmPayment: builder.mutation({
+      query: (body) => ({
+        url: "payment-confirmation",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -195,5 +280,14 @@ export const {
   useRegisterUserMutation,
   useLoadUserQuery,
   useLoginUserMutation,
+  useUpdateUserMutation,
   useLogoutUserMutation,
+  usePaymentCreationMutation,
+  useGetAllPaymentsQuery,
+  useGetUserStatsQuery,
+  useChangePasswordMutation,
+  useGetAllUsersQuery,
+  useDistributeCommissionMutation,
+  useRequestPaymentMutation,
+  useConfirmPaymentMutation,
 } = authApi;

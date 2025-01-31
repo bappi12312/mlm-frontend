@@ -15,6 +15,7 @@ function isValidToken(token: string): boolean {
 export function middleware(req: NextRequest) {
   try {
     const accessToken = req.cookies.get("accessToken")?.value;
+    console.log(accessToken)
     const isPublicRoute = PUBLIC_ROUTES.includes(req.nextUrl.pathname);
 
     if (accessToken && !isValidToken(accessToken)) {
