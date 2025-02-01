@@ -10,7 +10,7 @@ import {
   clearAuthCookies,
   setAuthCookies,
 } from "@/lib/utils/cookieUtils";
-import Cookies from "js-cookie";
+import { deleteCookie, getCookie } from "cookies-next";
 
 
 interface User {
@@ -48,11 +48,12 @@ const baseQuery = fetchBaseQuery({
   baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
   prepareHeaders: (headers, { getState }) => {
     headers.set("Content-Type", "application/json");
-    const token = (getState() as RootState).auth.accessToken || Cookies.get("accessToken");
+    const token = (getState() as RootState).auth.accessToken || getCookie('accessToken')
     console.log(token)
     if (token) headers.set("Authorization", `Bearer ${token}`);
     return headers;
   },
+  credentials: "include",
 });
 
 const baseQueryWithReauth = async (
@@ -64,7 +65,7 @@ const baseQueryWithReauth = async (
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
-    const refreshToken = (api.getState() as RootState).auth.refreshToken || state.auth.refreshToken || Cookies.get("refreshToken");
+    const refreshToken = (api.getState() as RootState).auth.refreshToken || state.auth.refreshToken || getCookie('refreshToken');
 
     if (refreshToken) {
       const refreshResult = await baseQuery(
@@ -79,8 +80,8 @@ const baseQueryWithReauth = async (
 
       if (refreshResult.error) {
         api.dispatch(userLoggedOut());
-        Cookies.remove('accessToken');
-        Cookies.remove('refreshToken');
+       deleteCookie('accessToken');
+       deleteCookie('refreshToken');
         return refreshResult;
       }
 

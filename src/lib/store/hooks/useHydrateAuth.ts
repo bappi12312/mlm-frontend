@@ -11,12 +11,12 @@ export function useHydrateAuth() {
       const authState = getAuthFromCookies(); // Fetch cookies on client-side
 
 
-      if (authState.user) {
+      if ((await authState).user) {
         dispatch(
           userLoggedIn({
-            user: authState.user,
-            accessToken: authState.accessToken || "",
-            refreshToken: authState.refreshToken || "",
+            user: (await authState).user,
+            accessToken: (await authState).accessToken || "",
+            refreshToken: (await authState).refreshToken || "",
           })
         );
       }
