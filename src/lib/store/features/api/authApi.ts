@@ -6,12 +6,8 @@ import {
   FetchArgs,
   BaseQueryApi,
 } from "@reduxjs/toolkit/query/react";
-import {
-  clearAuthCookies,
-  setAuthCookies,
-} from "@/lib/utils/cookieUtils";
+import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 import { deleteCookie, getCookie } from "cookies-next";
-
 
 interface User {
   _id: string;
@@ -28,7 +24,6 @@ interface User {
   transactions?: string[];
   createdAt: string;
   updatedAt: string;
-  __v?: number;
 }
 
 interface LoginData {
@@ -48,8 +43,9 @@ const baseQuery = fetchBaseQuery({
   baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
   prepareHeaders: (headers, { getState }) => {
     headers.set("Content-Type", "application/json");
-    const token = (getState() as RootState).auth.accessToken || getCookie('accessToken')
-    console.log(token)
+    const token =
+      (getState() as RootState).auth.accessToken || getCookie("accessToken");
+    console.log(token);
     if (token) headers.set("Authorization", `Bearer ${token}`);
     return headers;
   },
@@ -65,7 +61,10 @@ const baseQueryWithReauth = async (
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
-    const refreshToken = (api.getState() as RootState).auth.refreshToken || state.auth.refreshToken || getCookie('refreshToken');
+    const refreshToken =
+      (api.getState() as RootState).auth.refreshToken ||
+      state.auth.refreshToken ||
+      getCookie("refreshToken");
 
     if (refreshToken) {
       const refreshResult = await baseQuery(
@@ -80,27 +79,30 @@ const baseQueryWithReauth = async (
 
       if (refreshResult.error) {
         api.dispatch(userLoggedOut());
-       deleteCookie('accessToken');
-       deleteCookie('refreshToken');
+        deleteCookie("accessToken");
+        deleteCookie("refreshToken");
         return refreshResult;
       }
 
       if (refreshResult.data) {
-        const { accessToken, refreshToken: newRefreshToken } = (refreshResult.data as LoginResponse).data!;
+        const { accessToken, refreshToken: newRefreshToken } = (
+          refreshResult.data as LoginResponse
+        ).data!;
 
-        const userResult = await baseQuery({ url: 'profile' }, api, extraOptions);
+        const userResult = await baseQuery(
+          { url: "profile" },
+          api,
+          extraOptions
+        );
         const userData = (userResult.data as LoginResponse).data!.user as User;
 
         api.dispatch(
           userLoggedIn({
-            user: userData || state.auth.user as User,
+            user: userData || (state.auth.user as User),
             accessToken,
             refreshToken: newRefreshToken,
           })
         );
-
-
-
 
         setAuthCookies(state.auth.user as User, accessToken, newRefreshToken);
 
@@ -124,18 +126,21 @@ export const authApi = createApi({
   tagTypes: ["User", "Payment", "Stats"],
   endpoints: (builder) => ({
     registerUser: builder.mutation<
-    { user: User; message: string },
-    { name: string; email: string; password: string; referredBy: string }
-  >({
-    query: (credentials) => ({
-      url: "register",
-      method: "POST",
-      body: credentials,
+      { user: User; message: string },
+      { name: string; email: string; password: string; referredBy: string }
+    >({
+      query: (credentials) => ({
+        url: "register",
+        method: "POST",
+        body: credentials,
+      }),
+      invalidatesTags: ["User"],
     }),
-    invalidatesTags: ["User"],
-  }),
 
- loginUser: builder.mutation<LoginResponse, { email: string; password: string }>({
+    loginUser: builder.mutation<
+      LoginResponse,
+      { email: string; password: string }
+    >({
       query: (credentials) => ({
         url: "login",
         method: "POST",
@@ -146,8 +151,6 @@ export const authApi = createApi({
         try {
           const result = await queryFulfilled;
           if (result.data?.data) {
-            const { user, accessToken, refreshToken } = result.data.data;
-
             if (result.data.success && result.data.data) {
               const { accessToken, refreshToken, user } = result.data.data;
               // Remove non-null assertions
@@ -156,7 +159,10 @@ export const authApi = createApi({
             }
           }
         } catch (error) {
-          console.error("Login error:", error instanceof Error ? error.message : error);
+          console.error(
+            "Login error:",
+            error instanceof Error ? error.message : error
+          );
         }
       },
     }),
@@ -169,7 +175,10 @@ export const authApi = createApi({
           dispatch(userLoggedOut());
           clearAuthCookies();
         } catch (error) {
-          console.error("Logout error:", error instanceof Error ? error.message : error);
+          console.error(
+            "Logout error:",
+            error instanceof Error ? error.message : error
+          );
         }
       },
     }),
