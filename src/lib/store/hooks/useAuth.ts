@@ -1,24 +1,53 @@
+"use client"; // Essential for Next.js App Router
+
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLoadUserQuery } from "../features/api/authApi";
-import { useEffect, useState } from "react";
-import { userLoggedIn } from "../features/authSlice";
+import { userLoggedIn, userLoggedOut } from "../features/authSlice";
+import { clearAuthCookies, getAuthFromCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
+import { validateToken } from "@/lib/utils/authUtils"; // Add token validation
 
 const useAuth = () => {
   const dispatch = useDispatch();
-  const { data, isSuccess } = useLoadUserQuery();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [shouldFetch, setShouldFetch] = useState(false);
+  
+  // Only fetch after client-side check
+  const { data, isSuccess, isError } = useLoadUserQuery(undefined, {
+    skip: !shouldFetch,
+  });
 
   useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+    // Client-side only initialization
+    if (typeof window === "undefined") return;
 
-  useEffect(() => {
-    if (isSuccess && isHydrated && data?.data) {
-      dispatch(userLoggedIn(data.data)); // Ensure data.data is not undefined
+    const { accessToken, refreshToken } = getAuthFromCookies();
+    
+    // Validate tokens before fetching
+    if (validateToken(accessToken) && validateToken(refreshToken)) {
+      setShouldFetch(true);
+    } else {
+      dispatch(userLoggedOut());
     }
-  }, [isSuccess, isHydrated, dispatch, data]);
+  }, [dispatch]);
 
-  return isHydrated;
+  useEffect(() => {
+    if (isSuccess && data?.data) {
+      // Update both store and cookies with fresh tokens
+      dispatch(userLoggedIn(data.data));
+      setAuthCookies(
+        data.data?.user,
+        data.data.accessToken, 
+        data.data.refreshToken
+      );
+    }
+  }, [isSuccess, data, dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      dispatch(userLoggedOut());
+      clearAuthCookies();
+    }
+  }, [isError, dispatch]);
 };
 
 export default useAuth;

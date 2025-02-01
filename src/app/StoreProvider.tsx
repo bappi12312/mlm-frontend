@@ -1,32 +1,36 @@
 "use client";
+
 import { Provider } from "react-redux";
-import { store } from "@/lib/store/store";
-import { useEffect, useState } from "react";
+import { initializeStore } from "@/lib/store/store";
+import { useRef } from "react";
 import { useHydrateAuth } from "@/lib/store/hooks/useHydrateAuth";
-import useAuth from "@/lib/store/hooks/useAuth";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [isClient, setIsClient] = useState(false);
+  // Provide null as initial value and specify the type
+  const storeRef = useRef<ReturnType<typeof initializeStore> | null>(null);
 
-  useEffect(() => {
-    setIsClient(true); // Ensure component mounts properly
-  }, []);
-
-  if (!isClient) return null; // Prevent rendering until client-side hydration is done
+  if (!storeRef.current) {
+    storeRef.current = initializeStore();
+  }
 
   return (
-    <Provider store={store}>
-      <HydrateAuthWrapper>{children}</HydrateAuthWrapper>
+    <Provider store={storeRef.current}>
+      <AuthHydrator>{children}</AuthHydrator>
     </Provider>
   );
 }
 
-// ✅ Ensure hydration happens inside Provider
-function HydrateAuthWrapper({ children }: { children: React.ReactNode }) {
+function AuthHydrator({ children }: { children: React.ReactNode }) {
   useHydrateAuth();
-  const isHydrated = useAuth();
-
-  if (!isHydrated) return null; // Wait for hydration before rendering
-
   return <>{children}</>;
 }
+
+// export function Providers({ children }: { children: React.ReactNode }) {
+//   const [store] = useState(() => initializeStore());
+  
+//   return (
+//     <Provider store={store}>
+//       <AuthHydrator>{children}</AuthHydrator>
+//     </Provider>
+//   );
+// }

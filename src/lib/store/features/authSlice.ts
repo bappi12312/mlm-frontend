@@ -31,28 +31,19 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-const initializeAuthState = async (): Promise<AuthState> => {
-  // For Server Components: Return empty initial state
-  if (typeof window === 'undefined') {
-    return {
+const initialState: AuthState = typeof window !== "undefined" 
+  ? {
+      user: null,
+      accessToken: getAuthFromCookies().accessToken,
+      refreshToken: getAuthFromCookies().refreshToken,
+      isAuthenticated: false, // Will be validated later
+    }
+  : {
       user: null,
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
     };
-  }
-
-  // For Client Side: Read from cookies
-  const { user, accessToken, refreshToken } = await getAuthFromCookies();
-  
-  return {
-    user: user, // Don't store user in cookies
-    accessToken,
-    refreshToken,
-    isAuthenticated: !!accessToken && !!refreshToken,
-  };
-};
-const initialState: AuthState = await initializeAuthState();
 
 const authSlice = createSlice({
   name: "auth",
@@ -77,6 +68,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
 
       clearAuthCookies();
+      return initialState;
     },
   },
 });
