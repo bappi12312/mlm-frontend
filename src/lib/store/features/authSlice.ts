@@ -31,19 +31,12 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-const initialState: AuthState = typeof window !== "undefined" 
-  ? {
-      user: null,
-      accessToken: getAuthFromCookies().accessToken,
-      refreshToken: getAuthFromCookies().refreshToken,
-      isAuthenticated: false, // Will be validated later
-    }
-  : {
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      isAuthenticated: false,
-    };
+const initialState: AuthState = {
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  isAuthenticated: false,
+};
 
 const authSlice = createSlice({
   name: "auth",

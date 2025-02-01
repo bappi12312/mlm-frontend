@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import ClientComponents from "./ClientComponents";
+import DynamicProvider from "./ClientComponents";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,14 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-          <ClientComponents>
+          <DynamicProvider>
           {children}
-          </ClientComponents>
+          </DynamicProvider>
       
       </body>
     </html>
