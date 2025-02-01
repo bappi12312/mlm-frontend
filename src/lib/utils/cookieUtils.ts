@@ -3,10 +3,32 @@ import Cookies from "js-cookie";
 import { User } from "../store/features/authSlice";
 
 // ✅ Set cookies on the client side
-export const setAuthCookies = (user: User, accessToken: string, refreshToken: string) => {
-  Cookies.set("user", JSON.stringify(user), { expires: 7 });
-  Cookies.set("accessToken", accessToken, { expires: 7 });
-  Cookies.set("refreshToken", refreshToken, { expires: 7 });
+// lib/utils/cookieUtils.ts
+export const setAuthCookies = (
+  user: User, 
+  accessToken: string, 
+  refreshToken: string
+) => {
+  Cookies.set("user", JSON.stringify(user), { 
+    expires: 7, 
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production'
+  });
+  
+  Cookies.set("accessToken", accessToken, { 
+    expires: 7, 
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production'
+  });
+
+  Cookies.set("refreshToken", refreshToken, { 
+    expires: 7, 
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production'
+  });
 };
 
 // ✅ Clear cookies on the client side

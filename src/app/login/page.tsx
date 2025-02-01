@@ -56,8 +56,8 @@ const Login = () => {
   const handleAuthSubmit = async (type: AuthTab) => {
     try {
       if (type === "signup") {
-        const { name, email, password } = signupInput;
-        if (!name || !email || !password) return toast.error("All fields are required for signup.");
+        const { name, email, password,referredBy } = signupInput;
+        if (!name || !email || !password || !referredBy) return toast.error("All fields are required for signup.");
         await registerUser(signupInput).unwrap();
       } else {
         const { email, password } = loginInput;

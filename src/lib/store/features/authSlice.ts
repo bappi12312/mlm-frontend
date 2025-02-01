@@ -1,4 +1,4 @@
-import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
+import { clearAuthCookies, setAuthCookies,getAuthFromCookies } from "@/lib/utils/cookieUtils";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
@@ -31,12 +31,17 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-const initialState: AuthState = {
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  isAuthenticated: false,
+const initializeAuthState = () => {
+  const { user, accessToken, refreshToken } = getAuthFromCookies();
+  return {
+    user: user,
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    isAuthenticated: !!accessToken && !!refreshToken,
+  };
 };
+
+const initialState: AuthState = initializeAuthState();
 
 const authSlice = createSlice({
   name: "auth",

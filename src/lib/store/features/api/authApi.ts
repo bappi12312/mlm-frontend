@@ -3,7 +3,7 @@ import { RootState} from "../../store";
 import Cookies from "js-cookie";
 import { createApi, fetchBaseQuery, FetchArgs, BaseQueryApi } from "@reduxjs/toolkit/query/react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
-import { getAuthFromCookies } from "@/lib/utils/cookieUtils";
+import { clearAuthCookies, getAuthFromCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 
 interface DecodedToken extends JwtPayload {
   exp?: number;
@@ -40,8 +40,8 @@ interface UpdateResponse {
 interface LoginResponse {
   statusCode: number;
   data?: LoginData;
-  message: string;
-  success: boolean;
+  message?: string;
+  success?: boolean;
 }
 
 const baseQuery = fetchBaseQuery({
@@ -165,15 +165,25 @@ function normalizeHeaders(headers: Headers | string[][] | Record<string, string 
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: baseQueryWithReauth,
+  baseQuery:  baseQueryWithReauth,
   tagTypes: ["User", "Payment", "Stats"],
   endpoints: (builder) => ({
     registerUser: builder.mutation<{ user: User; message: string }, { name: string; email: string; password: string; referredBy: string }>({
       query: (credentials) => ({ url: "register", method: "POST", body: credentials }),
       invalidatesTags: ["User"],
     }),
-    loginUser: builder.mutation<LoginResponse, { email: string; password: string }>({
+    loginUser: builder.mutation<LoginResponse, { email: string; password: string, }> ({
       query: (credentials) => ({ url: "login", method: "POST", body: credentials }),
+      invalidatesTags: ["User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(userLoggedIn(result.data?.data || { user: {} as User, accessToken: "", refreshToken: "" }));
+          setAuthCookies(result.data?.data?.user || {} as User, result.data?.data?.accessToken || "", result.data?.data?.refreshToken || "");
+        } catch (error: unknown) {
+          console.error("Login error:", error instanceof Error ? error.message : error || "login error");
+        }
+      }
     }),
     logoutUser: builder.mutation({
       query: () => ({ url: "logout", method: "POST" }),
@@ -181,11 +191,7 @@ export const authApi = createApi({
         try {
           await queryFulfilled;
           dispatch(userLoggedOut());
-          Cookies.remove("accessToken");
-          Cookies.remove("refreshToken");
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
+         clearAuthCookies();
         } catch (error: unknown) {
           console.error("Logout error:", error instanceof Error ? error.message : error);
         }
@@ -194,6 +200,15 @@ export const authApi = createApi({
     loadUser: builder.query<LoginResponse, void>({
       query: () => ({ url: "profile", method: "GET" }),
       providesTags: ["User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(userLoggedIn(result.data?.data || { user: {} as User, accessToken: "", refreshToken: "" }));
+        setAuthCookies(result.data?.data?.user || {} as User, result.data?.data?.accessToken || "", result.data?.data?.refreshToken || "");
+        } catch (error: unknown) {
+          console.error("Load user error:", error instanceof Error ? error.message : error);
+        }
+      },
     }),
     updateUser: builder.mutation<UpdateResponse, Partial<User>>({
       query: (credentials) => ({
