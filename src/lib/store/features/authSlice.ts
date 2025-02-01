@@ -61,7 +61,6 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
 
       clearAuthCookies();
-      return initialState;
     },
   },
 });
