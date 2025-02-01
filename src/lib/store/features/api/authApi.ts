@@ -1,15 +1,20 @@
 import { userLoggedIn, userLoggedOut } from "../authSlice";
-import { RootState} from "../../store";
+import { RootState } from "../../store";
+import {
+  createApi,
+  fetchBaseQuery,
+  FetchArgs,
+  BaseQueryApi,
+} from "@reduxjs/toolkit/query/react";
+import {
+  clearAuthCookies,
+  setAuthCookies,
+} from "@/lib/utils/cookieUtils";
 import Cookies from "js-cookie";
-import { createApi, fetchBaseQuery, FetchArgs, BaseQueryApi } from "@reduxjs/toolkit/query/react";
-import { jwtDecode, JwtPayload } from "jwt-decode";
-import { clearAuthCookies, getAuthFromCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 
-interface DecodedToken extends JwtPayload {
-  exp?: number;
-}
 
 interface User {
+  _id: string;
   name: string;
   email: string;
   role: string;
@@ -20,10 +25,10 @@ interface User {
   status: string;
   photo?: string;
   downline?: string[];
-  _id: string;
   transactions?: string[];
   createdAt: string;
   updatedAt: string;
+  __v?: number;
 }
 
 interface LoginData {
@@ -32,20 +37,22 @@ interface LoginData {
   refreshToken: string;
 }
 
-interface UpdateResponse {
-  user: User;
-  message?: string;
-}
-
 interface LoginResponse {
   statusCode: number;
   data?: LoginData;
-  message?: string;
-  success?: boolean;
+  message: string;
+  success: boolean;
 }
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
+  prepareHeaders: (headers, { getState }) => {
+    headers.set("Content-Type", "application/json");
+    const token = (getState() as RootState).auth.accessToken || Cookies.get("accessToken");
+    console.log(token)
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return headers;
+  },
 });
 
 const baseQueryWithReauth = async (
@@ -54,163 +61,141 @@ const baseQueryWithReauth = async (
   extraOptions: Record<string, unknown>
 ) => {
   const state = api.getState() as RootState;
+  let result = await baseQuery(args, api, extraOptions);
 
-  // Ensure Cookies are accessed only on the client-side
-  const accessToken = getAuthFromCookies().accessToken || state.auth.accessToken;
-  console.log(accessToken)
-  console.log(Cookies.get("accessToken"))
+  if (result.error?.status === 401) {
+    const refreshToken = (api.getState() as RootState).auth.refreshToken || state.auth.refreshToken || Cookies.get("refreshToken");
 
-  const requestArgs: FetchArgs = typeof args === "string" ? { url: args } : { ...args };
-  const headers = requestArgs.headers ? normalizeHeaders(requestArgs.headers) : {};
+    if (refreshToken) {
+      const refreshResult = await baseQuery(
+        {
+          url: "refresh-token",
+          method: "POST",
+          body: { refreshToken },
+        },
+        api,
+        extraOptions
+      );
 
-  if (accessToken) {
-    headers.authorization = `Bearer ${accessToken}`;
+      if (refreshResult.error) {
+        api.dispatch(userLoggedOut());
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        return refreshResult;
+      }
 
-    let decoded: DecodedToken;
-    try {
-      decoded = jwtDecode<DecodedToken>(accessToken);
-    } catch (error) {
-      console.error("Invalid token:", error);
-      api.dispatch(userLoggedOut());
-      return { error: { status: 401, message: "Invalid token" } };
-    }
+      if (refreshResult.data) {
+        const { accessToken, refreshToken: newRefreshToken } = (refreshResult.data as LoginResponse).data!;
 
-    const currentTime = Math.floor(Date.now() / 1000);
-    if ((decoded.exp || 0) - currentTime < 300) {
-      const refreshToken = getAuthFromCookies().refreshToken || state.auth.refreshToken
+        const userResult = await baseQuery({ url: 'profile' }, api, extraOptions);
+        const userData = (userResult.data as LoginResponse).data!.user as User;
 
-      if (refreshToken) {
-        try {
-          const refreshResult = await baseQuery(
-            {
-              url: "refresh-token",
-              method: "POST",
-              body: { refreshToken },
-            },
-            api,
-            extraOptions
-          );
+        api.dispatch(
+          userLoggedIn({
+            user: userData || state.auth.user as User,
+            accessToken,
+            refreshToken: newRefreshToken,
+          })
+        );
 
-          if (refreshResult.data) {
-            const refreshData = refreshResult.data as LoginResponse;
-            const newAccessToken = refreshData.data?.accessToken;
-            const newRefreshToken = refreshData.data?.refreshToken;
 
-            if (newAccessToken && newRefreshToken) {
-              api.dispatch(
-                userLoggedIn({
-                  user: state.auth.user || ({} as User),
-                  accessToken: newAccessToken,
-                  refreshToken: newRefreshToken,
-                })
-              );
 
-              Cookies.set("accessToken", newAccessToken, { secure: true, sameSite: "strict" });
-              Cookies.set("refreshToken", newRefreshToken, { secure: true, sameSite: "strict" });
 
-              headers.authorization = `Bearer ${newAccessToken}`;
-            } else {
-              throw new Error("Token refresh failed: No tokens returned");
-            }
-          } else {
-            throw new Error("Token refresh failed: No data returned");
-          }
-        } catch (error) {
-          console.error("Token refresh error:", error);
-          api.dispatch(userLoggedOut());
-          Cookies.remove("accessToken");
-          Cookies.remove("refreshToken");
-          return { error: { status: 401, message: "Session expired" } };
-        }
+        setAuthCookies(state.auth.user as User, accessToken, newRefreshToken);
+
+        result = await baseQuery(args, api, extraOptions);
       } else {
         api.dispatch(userLoggedOut());
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
-        return { error: { status: 401, message: "No refresh token available" } };
+        clearAuthCookies();
       }
+    } else {
+      api.dispatch(userLoggedOut());
+      clearAuthCookies();
     }
-  }
-
-  requestArgs.headers = headers;
-  const result = await baseQuery(requestArgs, api, extraOptions);
-
-  if (result.error && result.error.status === 401) {
-    console.error("Unauthorized request:", result.error.data);
-    api.dispatch(userLoggedOut());
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
   }
 
   return result;
 };
 
-function normalizeHeaders(headers: Headers | string[][] | Record<string, string | undefined>): Record<string, string> {
-  if (headers instanceof Headers) {
-    const result: Record<string, string> = {};
-    headers.forEach((value, key) => {
-      result[key] = value;
-    });
-    return result;
-  }
-
-  if (Array.isArray(headers)) {
-    return headers.reduce((acc, [key, value]) => {
-      if (value) acc[key] = value;
-      return acc;
-    }, {} as Record<string, string>);
-  }
-
-  return headers as Record<string, string>;
-}
-
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery:  baseQueryWithReauth,
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["User", "Payment", "Stats"],
   endpoints: (builder) => ({
-    registerUser: builder.mutation<{ user: User; message: string }, { name: string; email: string; password: string; referredBy: string }>({
-      query: (credentials) => ({ url: "register", method: "POST", body: credentials }),
-      invalidatesTags: ["User"],
+    registerUser: builder.mutation<
+    { user: User; message: string },
+    { name: string; email: string; password: string; referredBy: string }
+  >({
+    query: (credentials) => ({
+      url: "register",
+      method: "POST",
+      body: credentials,
     }),
-    loginUser: builder.mutation<LoginResponse, { email: string; password: string, }> ({
-      query: (credentials) => ({ url: "login", method: "POST", body: credentials }),
+    invalidatesTags: ["User"],
+  }),
+
+ loginUser: builder.mutation<LoginResponse, { email: string; password: string }>({
+      query: (credentials) => ({
+        url: "login",
+        method: "POST",
+        body: credentials,
+      }),
       invalidatesTags: ["User"],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
-          dispatch(userLoggedIn(result.data?.data || { user: {} as User, accessToken: "", refreshToken: "" }));
-          setAuthCookies(result.data?.data?.user || {} as User, result.data?.data?.accessToken || "", result.data?.data?.refreshToken || "");
-        } catch (error: unknown) {
-          console.error("Login error:", error instanceof Error ? error.message : error || "login error");
+          if (result.data?.data) {
+            const { user, accessToken, refreshToken } = result.data.data;
+
+            if (result.data.success && result.data.data) {
+              const { accessToken, refreshToken, user } = result.data.data;
+              // Remove non-null assertions
+              dispatch(userLoggedIn({ user, accessToken, refreshToken }));
+              setAuthCookies(user, accessToken, refreshToken);
+            }
+          }
+        } catch (error) {
+          console.error("Login error:", error instanceof Error ? error.message : error);
         }
-      }
+      },
     }),
+
     logoutUser: builder.mutation({
       query: () => ({ url: "logout", method: "POST" }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
           dispatch(userLoggedOut());
-         clearAuthCookies();
-        } catch (error: unknown) {
+          clearAuthCookies();
+        } catch (error) {
           console.error("Logout error:", error instanceof Error ? error.message : error);
         }
       },
     }),
+
     loadUser: builder.query<LoginResponse, void>({
       query: () => ({ url: "profile", method: "GET" }),
       providesTags: ["User"],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          const result = await queryFulfilled;
-          dispatch(userLoggedIn(result.data?.data || { user: {} as User, accessToken: "", refreshToken: "" }));
-        setAuthCookies(result.data?.data?.user || {} as User, result.data?.data?.accessToken || "", result.data?.data?.refreshToken || "");
-        } catch (error: unknown) {
-          console.error("Load user error:", error instanceof Error ? error.message : error);
+          const { data } = await queryFulfilled;
+          if (data?.data) {
+            dispatch(
+              userLoggedIn({
+                user: data.data.user,
+                accessToken: data.data.accessToken,
+                refreshToken: data.data.refreshToken,
+              })
+            );
+          }
+        } catch (error) {
+          dispatch(userLoggedOut());
+          clearAuthCookies();
         }
       },
     }),
-    updateUser: builder.mutation<UpdateResponse, Partial<User>>({
+
+    updateUser: builder.mutation<{ message: string }, Partial<User>>({
       query: (credentials) => ({
         url: "update-user",
         method: "PATCH",

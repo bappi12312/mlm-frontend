@@ -10,6 +10,7 @@ export function useHydrateAuth() {
     const hydrateAuth = async () => {
       const authState = getAuthFromCookies(); // Fetch cookies on client-side
 
+
       if (authState.user) {
         dispatch(
           userLoggedIn({
