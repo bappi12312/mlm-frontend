@@ -1,4 +1,4 @@
-import { clearAuthCookies, setAuthCookies,getAuthFromCookies } from "@/lib/utils/cookieUtils";
+import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
