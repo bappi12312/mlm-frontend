@@ -134,7 +134,7 @@ export const authApi = createApi({
         method: "POST",
         body: credentials,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User"]
     }),
 
     loginUser: builder.mutation<
