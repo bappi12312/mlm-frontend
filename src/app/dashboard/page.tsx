@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useAppSelector } from "@/lib/store/hooks";
 import { UserCheck, UserRoundPen, BarChart } from "lucide-react";
 import ProfileDetals from "@/components/profile/ProfileDetals";
+import GetAllUsers from "@/components/admin/GetAllUsers";
 
 type TabID = "profile" | "manage-users" | "analytics";
 
@@ -64,6 +65,7 @@ const AdminPage = () => {
         )}
 
         {activeTab === "profile" && <ProfileDetals />}
+        {activeTab === "manage-users" && <GetAllUsers />}
       </div>
     </div>
   );

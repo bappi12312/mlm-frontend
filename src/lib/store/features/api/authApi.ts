@@ -45,7 +45,7 @@ const baseQuery = fetchBaseQuery({
     headers.set("Content-Type", "application/json");
     const token =
       (getState() as RootState).auth.accessToken || getCookie("accessToken");
-    console.log(token);
+      
     if (token) headers.set("Authorization", `Bearer ${token}`);
     return headers;
   },
@@ -226,7 +226,7 @@ export const authApi = createApi({
     }),
     getAllPayments: builder.query({
       query: () => ({
-        url: "payments",
+        url: "getAllPayment",
         method: "GET",
       }),
       providesTags: ["Payment"],
