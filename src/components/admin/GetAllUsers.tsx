@@ -5,6 +5,7 @@ import {
   useGetAllUsersQuery,
 } from "@/lib/store/features/api/authApi";
 import List from "../share/List";
+import { UsersTable } from "../share/UsersTable";
 
 const GetAllUsers = () => {
   const { data, isLoading, isError } = useGetAllUsersQuery({});
@@ -28,7 +29,7 @@ const GetAllUsers = () => {
   return (
     <>
       {((isLoading && isPaymentLoading) === false) && (
-        <div>
+        <div className="space-y-6">
           <div className="flex flex-col md:flex-row gap-5 items-center justify-center ">
             <List title="Users" data={length} color="bg-amber-500" />
             <List
@@ -36,6 +37,9 @@ const GetAllUsers = () => {
               data={paymentLength}
               color="bg-green-500"
             />
+          </div>
+          <div>
+          <UsersTable />
           </div>
         </div>
       )}
