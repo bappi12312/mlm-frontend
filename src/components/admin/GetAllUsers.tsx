@@ -39,7 +39,7 @@ const GetAllUsers = () => {
             />
           </div>
           <div>
-          <UsersTable />
+          <UsersTable data={data?.data?.users} />
           </div>
         </div>
       )}

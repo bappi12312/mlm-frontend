@@ -9,7 +9,7 @@ import {
 import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 import { deleteCookie, getCookie } from "cookies-next";
 
-interface User {
+export interface User {
   _id: string;
   name: string;
   email: string;
