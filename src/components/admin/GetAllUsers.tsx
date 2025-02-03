@@ -31,10 +31,10 @@ const GetAllUsers = () => {
   if (isError || isPaymentError)
     return <div>Error: something went worng to getAll users or payments</div>;
   return (
-    <div className="text-center flex justify-center items-center">
+    <div className=" flex justify-center items-center">
       {(isLoading && isPaymentLoading) === false && (
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row gap-5 items-center justify-center ">
+        <div className="space-y-6 flex items-center justify-center flex-col">
+          <div className="flex flex-col md:flex-row gap-5 items-center justify-center">
             <List title="Users" data={length} color="bg-amber-500" />
             <List
               title="total payments"
@@ -42,18 +42,22 @@ const GetAllUsers = () => {
               color="bg-green-500"
             />
           </div>
-          <div className="w-full">
-            <div className="flex items-center justify-center mx-auto">
+          <div className="container px-8">
+            <div className="flex items-center justify-center mx-auto w-full">
               <Tabs defaultValue="account" className="text-white">
                 <TabsList className="bg-green-600 text-white">
                   <TabsTrigger value="users">All Users</TabsTrigger>
                   <TabsTrigger value="payments">Payments</TabsTrigger>
+                  <TabsTrigger value="request">Payment Request</TabsTrigger>
                 </TabsList>
                 <TabsContent value="users">
                   <UsersTable data={data?.data?.users} heading={heading} />
                 </TabsContent>
                 <TabsContent value="payments">
                   <UsersTable data={paymentData?.data?.payments} heading={heading} />
+                </TabsContent>
+                <TabsContent value="request">
+                  payment request
                 </TabsContent>
               </Tabs>
             </div>
