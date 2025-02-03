@@ -12,19 +12,20 @@ import { User } from "@/lib/store/features/authSlice";
 
 type Props = {
   data: User[];
+  heading: string[]
 }
 
-export function UsersTable({data}: Props) {
-  console.log(data)
+export function UsersTable({data,heading}: Props) {
   return (
     <Table>
       <TableCaption>A list of your recent users.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Name</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead className="text-right">Earnings</TableHead>
+         {
+          heading && heading?.map((head) => (
+            <TableHead key={head} className="w-[100px]">Name</TableHead>
+          ))
+         }
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -40,7 +41,7 @@ export function UsersTable({data}: Props) {
       <TableFooter>
         <TableRow>
           <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
+          <TableCell className="text-right">{data?.reduce((total, invoice) => total + Number(invoice.earnings) || 0, 0)}</TableCell>
         </TableRow>
       </TableFooter>
     </Table>

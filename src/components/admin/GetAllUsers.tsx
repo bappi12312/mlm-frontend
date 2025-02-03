@@ -18,6 +18,14 @@ const GetAllUsers = () => {
 
   const length = data?.data?.users?.length;
   const paymentLength = paymentData?.data?.payments?.length;
+
+  const heading = [
+    "Name",
+    "Status",
+    "Role",
+    "Earnings",
+  ]
+
   if (isLoading && isPaymentLoading)
     return (
       <div className="text-center text-3xl flex justify-center items-center text-main">
@@ -39,7 +47,7 @@ const GetAllUsers = () => {
             />
           </div>
           <div>
-          <UsersTable data={data?.data?.users} />
+          <UsersTable data={data?.data?.users} heading={heading}/>
           </div>
         </div>
       )}
