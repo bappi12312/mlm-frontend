@@ -49,9 +49,9 @@ const authSlice = createSlice({
       state.refreshToken = refreshToken;
       state.isAuthenticated = true;
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Auth update:', { accessToken, refreshToken, user });
-      }
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log('Auth update:', { accessToken, refreshToken, user });
+      // }
       setAuthCookies(user, accessToken, refreshToken);
     },
     userLoggedOut: (state) => {

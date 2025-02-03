@@ -20,7 +20,6 @@ interface MenuItem {
 
 const Navbar = () => {
   const { user, isAuthenticated } = useAppSelector((state: RootState) => state.auth);
-  console.log(user)
   const dispatch = useAppDispatch();
   const router = useRouter();
   
