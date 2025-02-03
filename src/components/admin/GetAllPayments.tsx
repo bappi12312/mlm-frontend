@@ -11,7 +11,7 @@ const GetAllPayments = () => {
   if (isError) return <div>Error: something went worng to getAll users</div>;
 
   return (
-    <div>GetAllPayments: {paymentLength}</div>
+    <div>GetAllPayments: </div>
   )
 }
 
