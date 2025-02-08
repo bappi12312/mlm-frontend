@@ -1,5 +1,3 @@
-
-
 import {
   url,
 } from "@/lib/store/features/api/authApi";
@@ -20,22 +18,36 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
+interface Payment {
+  _id: string;
+  Amount: number;
+  FromNumber: string;
+  PaymentDate: string;
+  updatedAt: string;
+  createdAt: string;
+  ToNumber: string;
+  user: string;
+  __v: number;
+}
+
 
 const GetAllUsers = () => {
   const { data, error, isLoading } = useSWR(`${url}/get-all-users`, fetcher);
+  const { data: paymentData, error: paymentError, isLoading: paymentLoading } = useSWR(`${url}/getAllPayment`, fetcher);
 
  const users: User[] = data?.data?.users
+ const usersPayment: Payment[] = paymentData?.data?.payments
   
 
   const heading: string[] = ["Name", "Status", "Role", "Earnings"];
 
-  if (isLoading)
+  if (isLoading || paymentLoading)
     return (
       <div className="text-center text-3xl flex justify-center items-center text-main">
         Loading...
       </div>
     );
-  if (error)
+  if (error || paymentError)
     return <div>Error: something went worng to getAll users or payments</div>;
   return (
     <div className=" flex justify-center items-center">
