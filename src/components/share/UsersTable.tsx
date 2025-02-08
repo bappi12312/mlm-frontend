@@ -1,3 +1,5 @@
+
+
 import {
   Table,
   TableBody,
@@ -9,13 +11,29 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { User } from "@/lib/store/features/authSlice";
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner";
+import { useUserActions } from "@/lib/store/hooks/useUserActions";
 
 type Props = {
   data: User[];
-  heading: string[]
+  heading: string[];
+  fetcher?: (url: string) => Promise<User[]>;
 }
 
-export function UsersTable({data,heading}: Props) {
+export function UsersTable({data,heading,fetcher}: Props) {
+  const { deleteUser } = useUserActions();
+
+
+  const handleDelete = async(id: string) => {
+    try {
+      console.log(id)
+      await deleteUser(id)
+    } catch (error) {
+      console.error("Error in handleDelete:", error); // Log the error
+      toast.error("Failed to delete user");
+    }
+  }
   return (
     <Table>
       <TableCaption>A list of your recent users.</TableCaption>
@@ -35,6 +53,9 @@ export function UsersTable({data,heading}: Props) {
             <TableCell>{invoice.status}</TableCell>
             <TableCell>{invoice.role || "user"}</TableCell>
             <TableCell className="text-right">{invoice.earnings || 0}</TableCell>
+            <TableCell className="text-right">
+            <Button size={"sm"} onClick={()=> handleDelete(invoice._id)}>Delete</Button>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -39,6 +39,8 @@ interface LoginResponse {
   success: boolean;
 }
 
+export const url = "https://mlm-sebsite-backend.onrender.com/api/v1/users";
+
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://mlm-sebsite-backend.onrender.com/api/v1/users/",
   prepareHeaders: (headers, { getState }) => {
