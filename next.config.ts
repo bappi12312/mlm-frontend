@@ -6,12 +6,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "imgs.search.brave.com",
-        pathname: "/**", // Allow all paths under this hostname
+        hostname: "**", // Allows all HTTPS domains
       },
     ],
-
-  }
+  },
 };
 
 export default nextConfig;

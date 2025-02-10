@@ -12,7 +12,7 @@ export interface demoProduct {
 export const products = [
   {
     _id: "1",
-    image: "https://example.com/image1.jpg",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D",
     name: "Wireless Headphones",
     owner: "John Doe",
     description: "High-quality wireless headphones with noise cancellation.",
@@ -22,7 +22,7 @@ export const products = [
   },
   {
     _id: "2",
-    image: "https://example.com/image2.jpg",
+    image: "https://plus.unsplash.com/premium_photo-1679913792906-13ccc5c84d44?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D",
     name: "Gaming Mouse",
     owner: "Alice Smith",
     description: "Ergonomic gaming mouse with customizable buttons and RGB lighting.",
@@ -32,7 +32,7 @@ export const products = [
   },
   {
     _id: "3",
-    image: "https://example.com/image3.jpg",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHByb2R1Y3R8ZW58MHx8MHx8fDA%3D",
     name: "Smartwatch",
     owner: "Michael Brown",
     description: "Feature-rich smartwatch with health tracking and notifications.",
@@ -42,7 +42,7 @@ export const products = [
   },
   {
     _id: "4",
-    image: "https://example.com/image4.jpg",
+    image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHByb2R1Y3R8ZW58MHx8MHx8fDA%3D",
     name: "Bluetooth Speaker",
     owner: "Sarah Johnson",
     description: "Portable Bluetooth speaker with deep bass and 10-hour battery life.",
@@ -52,7 +52,7 @@ export const products = [
   },
   {
     _id: "5",
-    image: "https://example.com/image5.jpg",
+    image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHByb2R1Y3R8ZW58MHx8MHx8fDA%3D",
     name: "Mechanical Keyboard",
     owner: "David Lee",
     description: "Mechanical keyboard with customizable RGB backlighting and blue switches.",

@@ -19,11 +19,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { demoProduct } from "@/lib/utils/demo"
+import CardImage from "./CardImage"
 
 const ProductsCard = ({product}: {product: demoProduct}) => {
   return (
-    <Card className=" bg-black text-white sm:hover:scale-105 sm:transition-all sm:duration-300">
+    <Card className="bg-black text-white">
     <CardHeader>
+     <div className="w-full mx-auto">
+     <CardImage url={product && product.image}/>
+     </div>
       <CardTitle>{product && product.name}</CardTitle>
       <CardDescription>Deploy your new project in one-click.</CardDescription>
     </CardHeader>
