@@ -30,6 +30,7 @@ const Navbar = () => {
 
   const NavbarMenu: MenuItem[] = [
     { id: 1, title: "Home", link: "/" },
+    { id: 4, title: "Products", link: "/products", showWhen: isAuthenticated },
     { id: 2, title: "Dashboard", link: "/dashboard", showWhen: isAuthenticated },
     { id: 3, title: "Login", link: "/login", showWhen: !isAuthenticated },
   ];
@@ -49,7 +50,7 @@ const Navbar = () => {
 
           {/* Menu Section */}
           <div className="hidden md:block">
-            <ul className="flex items-center gap-6">
+            <ul className="flex items-center">
               {NavbarMenu.filter((item) => item.showWhen !== false).map((item) => (
                 <li key={item.id}>
                   <Link

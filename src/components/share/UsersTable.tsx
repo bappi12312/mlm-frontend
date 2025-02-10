@@ -18,10 +18,9 @@ import { useUserActions } from "@/lib/store/hooks/useUserActions";
 type Props = {
   data: User[];
   heading: string[];
-  fetcher?: (url: string) => Promise<User[]>;
 }
 
-export function UsersTable({data,heading,fetcher}: Props) {
+export function UsersTable({data,heading}: Props) {
   const { deleteUser } = useUserActions();
 
 
@@ -41,7 +40,7 @@ export function UsersTable({data,heading,fetcher}: Props) {
         <TableRow>
          {
           heading && heading?.map((head) => (
-            <TableHead key={head} className="w-[100px]">Name</TableHead>
+            <TableHead key={head} className="w-[100px]">{head}</TableHead>
           ))
          }
         </TableRow>

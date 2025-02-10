@@ -8,6 +8,7 @@ import { getAuthFromCookies } from "@/lib/utils/cookieUtils";
 import useSWR from "swr";
 import { User } from "@/lib/store/features/authSlice";
 
+
 const fetcher = async (url: string) => {
   const response = await fetch(url, {
     headers: {
@@ -18,7 +19,7 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
-interface Payment {
+export interface Payment {
   _id: string;
   Amount: number;
   FromNumber: string;
@@ -37,6 +38,8 @@ const GetAllUsers = () => {
 
  const users: User[] = data?.data?.users
  const usersPayment: Payment[] = paymentData?.data?.payments
+
+ const paymentLength = usersPayment?.length;
   
 
   const heading: string[] = ["Name", "Status", "Role", "Earnings"];
@@ -57,7 +60,7 @@ const GetAllUsers = () => {
             <List title="Users" data={users?.length || 0} color="bg-amber-500" />
             <List
               title="total payments"
-              data={10}
+              data={paymentLength || 0}
               color="bg-green-500"
             />
           </div>
@@ -70,11 +73,11 @@ const GetAllUsers = () => {
                   <TabsTrigger value="request">Payment Request</TabsTrigger>
                 </TabsList>
                 <TabsContent value="users">
-                  <UsersTable data={users || []} heading={heading} fetcher={fetcher} />
+                  <UsersTable data={users || []} heading={heading}/>
                 </TabsContent>
-                {/* <TabsContent value="payments">
-                  <UsersTable data={paymentData?.data?.payments} heading={heading} />
-                </TabsContent> */}
+                <TabsContent value="payments">
+                  {/* <UsersTable data={usersPayment || []} heading={heading} /> */}
+                </TabsContent>
                 <TabsContent value="request">
                   payment request
                 </TabsContent>

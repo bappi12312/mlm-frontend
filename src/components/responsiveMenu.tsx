@@ -18,6 +18,7 @@ interface MenuItem {
 const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ open, setOpen, isAuthenticated }) => {
   const NavbarMenu: MenuItem[] = [
     { id: 1, title: "Home", link: "/" },
+    { id: 4, title: "Products", link: "/products", showWhen: isAuthenticated },
     { id: 2, title: "Dashboard", link: "/dashboard", showWhen: isAuthenticated },
     { id: 3, title: "Login", link: "/login", showWhen: !isAuthenticated },
   ];
