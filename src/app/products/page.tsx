@@ -1,10 +1,21 @@
-import ProductsCard from "@/components/share/ProductsCard"
-import { demoProduct, products } from "@/lib/utils/demo"
+"use client";
 
+import { fetcher } from "@/components/admin/GetAllUsers";
+import ProductsCard from "@/components/share/ProductsCard"
+import {
+  url,
+} from "@/lib/store/features/api/authApi";
+import { CoursePakage } from "@/types/types";
+import useSWR from "swr";
 
 
 const ProductPage = () => {
-  const productss: demoProduct[] = products || []
+  const { data, error, isLoading } = useSWR(`${url}/get-all-courses?page=1&limit=10&status=active&sort=-createdAt`, fetcher);
+  console.log(data)
+  const courses : CoursePakage[] = data?.data?.courses
+  console.log(courses)
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: something went wrong</div>
   return (
     <div className="container w-full space-y-20">
       <div className="flex justify-center h-full">
@@ -12,7 +23,7 @@ const ProductPage = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {
-        productss && productss?.map((product) => (
+        courses && courses?.map((product) => (
           <ProductsCard key={product._id} product={product} />
         ))
       }

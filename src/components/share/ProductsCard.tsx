@@ -18,10 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { demoProduct } from "@/lib/utils/demo"
 import CardImage from "./CardImage"
+import { CoursePakage } from "@/types/types";
 
-const ProductsCard = ({product}: {product: demoProduct}) => {
+const ProductsCard = ({product}: {product: CoursePakage}) => {
   return (
     <Card className="bg-black text-white">
     <CardHeader>

@@ -7,9 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAuthFromCookies } from "@/lib/utils/cookieUtils";
 import useSWR from "swr";
 import { User } from "@/lib/store/features/authSlice";
+import { Payment } from "@/types/types";
 
-
-const fetcher = async (url: string) => {
+export const fetcher = async (url: string) => {
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${getAuthFromCookies()?.accessToken}`,
@@ -18,18 +18,6 @@ const fetcher = async (url: string) => {
   if (!response.ok) throw new Error('Failed to fetch users');
   return response.json();
 };
-
-export interface Payment {
-  _id: string;
-  Amount: number;
-  FromNumber: string;
-  PaymentDate: string;
-  updatedAt: string;
-  createdAt: string;
-  ToNumber: string;
-  user: string;
-  __v: number;
-}
 
 
 const GetAllUsers = () => {
