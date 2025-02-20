@@ -29,35 +29,23 @@ const ProductsCard = ({product}: {product: CoursePakage}) => {
      <CardImage url={product && product.image}/>
      </div>
       <CardTitle>{product && product.name}</CardTitle>
-      <CardDescription>Deploy your new project in one-click.</CardDescription>
+      <CardDescription>{product?.description || "Description"}</CardDescription>
     </CardHeader>
     <CardContent>
       <form>
         <div className="grid w-full items-center gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" placeholder="Name of your project" />
+          <div className="flex items-center justify-between">
+            <h3>caregory: {product && product.category}</h3>
+            <h3>isAvail: {product && product.status}</h3>
           </div>
           <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="framework">Framework</Label>
-            <Select>
-              <SelectTrigger id="framework">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="next">Next.js</SelectItem>
-                <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                <SelectItem value="astro">Astro</SelectItem>
-                <SelectItem value="nuxt">Nuxt.js</SelectItem>
-              </SelectContent>
-            </Select>
+           <h3>price: {product && product.price}</h3>
           </div>
         </div>
       </form>
     </CardContent>
-    <CardFooter className="flex justify-between">
-      <Button>Cancel</Button>
-      <Button>Deploy</Button>
+    <CardFooter className="w-full flex">
+      <Button className="flex-1" variant={"destructive"}>pay now</Button>
     </CardFooter>
   </Card>
   );
