@@ -59,5 +59,43 @@ export const useUserActions = () => {
     }
   };
 
-  return { deleteUser };
+  const createProduct = async (formData: FormData) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+  
+    try {
+      const response = await fetch(`${url}/create-course`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: formData, // Send FormData directly
+      });
+  
+      const responseText = await response.text();
+      
+      if (!response.ok) {
+        const errorMessage = responseText.startsWith('<!DOCTYPE') 
+          ? extractErrorMessageFromHTML(responseText)
+          : JSON.parse(responseText).message;
+        
+        throw new Error(errorMessage || 'Request failed');
+      }
+  
+      return true;
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  return { deleteUser, createProduct };
+};
+
+const extractErrorMessageFromHTML = (html: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  return doc.querySelector('pre')?.textContent || 'Unknown error';
 };

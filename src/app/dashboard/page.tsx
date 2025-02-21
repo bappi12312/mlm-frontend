@@ -6,8 +6,9 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { UserCheck, UserRoundPen, BarChart } from "lucide-react";
 import ProfileDetals from "@/components/profile/ProfileDetals";
 import GetAllUsers from "@/components/admin/GetAllUsers";
+import ManageAllProducts from "@/components/manageProducts/ManageAllProducts";
 
-type TabID = "profile" | "manage-users" | "analytics";
+type TabID = "profile" | "manage-users" | "analytics" | "manage-products";
 
 interface Tab {
   id: TabID;
@@ -24,6 +25,7 @@ const AdminPage = () => {
   const tabs: Tab[] = [
     { id: "profile", label: "Profile", icon: UserCheck, showWhen: isAuthenticated },
     { id: "manage-users", label: "Manage Users", icon: UserRoundPen, showWhen: user?.role === "admin" },
+    { id: "manage-products", label: "Manage Products", icon: UserRoundPen, showWhen: user?.role === "admin" },
     { id: "analytics", label: "Analytics", icon: BarChart, showWhen: isAuthenticated },
   ].filter((tab) => tab.showWhen) as Tab[];
 
@@ -66,6 +68,7 @@ const AdminPage = () => {
 
         {activeTab === "profile" && <ProfileDetals />}
         {activeTab === "manage-users" && <GetAllUsers />}
+        {activeTab === "manage-products" && <ManageAllProducts />}
       </div>
     </div>
   );

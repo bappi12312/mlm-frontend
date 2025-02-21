@@ -3,10 +3,10 @@ export interface CoursePakage {
   price: number;
   description: string;
   image: string;
-  status: string;
+  status?: string;
   category: string;
-  createdAt: Date;
-  _id: string;
+  createdAt?: Date;
+  _id?: string;
 }
 
 export interface Sale {
