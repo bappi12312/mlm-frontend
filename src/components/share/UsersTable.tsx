@@ -113,7 +113,7 @@ export function UsersTable({ data, heading }: Props) {
                 </Button>
               </TableCell>
               <TableCell className="text-right">
-                <form onSubmit={(e) => handleSubmit(e, invoice._id)}>
+                <form onSubmit={(e) => handleSubmit(e, invoice._id)} className="w-full flex items-center justify-center gap-3">
                   <Select
                     value={selectedField}
                     onValueChange={(value: FieldType) => {
@@ -155,7 +155,7 @@ export function UsersTable({ data, heading }: Props) {
                   ) : null}
                   <button
                     type="submit"
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+                    className=" px-4 py-2 bg-blue-500 text-white rounded"
                     disabled={!selectedField || !fieldValue}
                   >
                     Submit
