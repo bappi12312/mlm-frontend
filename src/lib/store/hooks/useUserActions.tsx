@@ -4,11 +4,11 @@ import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { User } from "../features/authSlice";
 
-interface Update {
-  status: string;
-  isPay: boolean;
-  isAffiliate: boolean;
-  isPayForCourse: boolean;
+export interface Update {
+  status?: "Active" | "Inactive";
+  isPay?: boolean;
+  isAffiliate?: boolean;
+  isPayForCourse?: boolean;
 }
 
 interface Purchased {
