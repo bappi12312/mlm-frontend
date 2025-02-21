@@ -91,7 +91,115 @@ export const useUserActions = () => {
     }
   };
 
-  return { deleteUser, createProduct };
+  const updateProduct = async (id: string, formData: FormData) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+  
+    try {
+      const response = await fetch(`${url}/update-course/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: formData, // Send FormData directly
+      });
+  
+      const responseText = await response.text();
+      
+      if (!response.ok) {
+        const errorMessage = responseText.startsWith('<!DOCTYPE') 
+          ? extractErrorMessageFromHTML(responseText)
+          : JSON.parse(responseText).message;
+        
+        throw new Error(errorMessage || 'Request failed');
+      }
+  
+      return true;
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+  
+    try {
+      const response = await fetch(`${url}/delete-course/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Deletion failed");
+      }
+  
+      return true;
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  const getProductById = async (id: string) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+  
+    try {
+      const response = await fetch(`${url}/get-course-by-id/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch product");
+      }
+  
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  const getAffiliateSales = async (id: string) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+  
+    try {
+      const response = await fetch(`${url}/affiliate-sales/${id}?page=1&limit=10`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch sales");
+      }
+  
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  return { deleteUser, createProduct,deleteProduct,getProductById,getAffiliateSales,updateProduct };
 };
 
 const extractErrorMessageFromHTML = (html: string) => {
