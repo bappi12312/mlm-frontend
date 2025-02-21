@@ -4,7 +4,31 @@ import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { User } from "../features/authSlice";
 
-export const useUserActions = () => {
+interface Update {
+  status: string;
+  isPay: boolean;
+  isAffiliate: boolean;
+  isPayForCourse: boolean;
+}
+
+interface Purchased {
+  courseId: string;
+  affiliateCode: string;
+}
+
+interface UserActions {
+  deleteUser: (id: string) => Promise<boolean>;
+  createProduct: (formData: FormData) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<boolean>;
+  getProductById: (id: string) => Promise<any>;
+  getAffiliateSales: (id: string) => Promise<any>;
+  updateProduct: (id: string, formData: FormData) => Promise<boolean>;
+  updateUserStatus: (id: string, updatedData: Update) => Promise<boolean>;
+  coursePurchase: (purChasedData: Purchased) => Promise<boolean>;
+  activateAffiliate: () => Promise<boolean>;
+}
+
+export const useUserActions = (): UserActions => {
   const { mutate } = useSWRConfig();
 
   const deleteUser = async (id: string) => {
@@ -16,18 +40,22 @@ export const useUserActions = () => {
 
     try {
       // Optimistic update: remove user immediately from UI
-      mutate(`${url}/get-all-users`, (currentData: unknown) => {
-        // 1. Type guard for array
-        if (!Array.isArray(currentData)) {
-          return currentData; // Leave intact for revalidation
-        }
-      
-        // 2. Type guard for User objects
-        return currentData.filter((item): item is User => {
-          const user = item as User;
-          return typeof user._id === 'string' && user._id !== id;
-        });
-      }, false);
+      mutate(
+        `${url}/get-all-users`,
+        (currentData: unknown) => {
+          // 1. Type guard for array
+          if (!Array.isArray(currentData)) {
+            return currentData; // Leave intact for revalidation
+          }
+
+          // 2. Type guard for User objects
+          return currentData.filter((item): item is User => {
+            const user = item as User;
+            return typeof user._id === "string" && user._id !== id;
+          });
+        },
+        false
+      );
 
       // Send delete request
       const response = await fetch(`${url}/delete-user/${id}`, {
@@ -35,7 +63,7 @@ export const useUserActions = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
-        }
+        },
       });
 
       if (!response.ok) {
@@ -46,15 +74,17 @@ export const useUserActions = () => {
       // Force revalidation to ensure consistency with server
       mutate(`${url}/get-all-users`);
 
-      toast.success('User deleted successfully');
+      toast.success("User deleted successfully");
       return true;
     } catch (error) {
       console.error("Delete error:", error);
-      
+
       // Revert optimistic update on error
       mutate(`${url}/get-all-users`);
-      
-      toast.error(error instanceof Error ? error.message : "Failed to delete user");
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete user"
+      );
       return false;
     }
   };
@@ -65,7 +95,7 @@ export const useUserActions = () => {
       toast.error("Authentication required");
       return false;
     }
-  
+
     try {
       const response = await fetch(`${url}/create-course`, {
         method: "POST",
@@ -74,17 +104,17 @@ export const useUserActions = () => {
         },
         body: formData, // Send FormData directly
       });
-  
+
       const responseText = await response.text();
-      
+
       if (!response.ok) {
-        const errorMessage = responseText.startsWith('<!DOCTYPE') 
+        const errorMessage = responseText.startsWith("<!DOCTYPE")
           ? extractErrorMessageFromHTML(responseText)
           : JSON.parse(responseText).message;
-        
-        throw new Error(errorMessage || 'Request failed');
+
+        throw new Error(errorMessage || "Request failed");
       }
-  
+
       return true;
     } catch (error) {
       throw error; // Propagate error to component
@@ -97,7 +127,7 @@ export const useUserActions = () => {
       toast.error("Authentication required");
       return false;
     }
-  
+
     try {
       const response = await fetch(`${url}/update-course/${id}`, {
         method: "PATCH",
@@ -106,17 +136,17 @@ export const useUserActions = () => {
         },
         body: formData, // Send FormData directly
       });
-  
+
       const responseText = await response.text();
-      
+
       if (!response.ok) {
-        const errorMessage = responseText.startsWith('<!DOCTYPE') 
+        const errorMessage = responseText.startsWith("<!DOCTYPE")
           ? extractErrorMessageFromHTML(responseText)
           : JSON.parse(responseText).message;
-        
-        throw new Error(errorMessage || 'Request failed');
+
+        throw new Error(errorMessage || "Request failed");
       }
-  
+
       return true;
     } catch (error) {
       throw error; // Propagate error to component
@@ -129,7 +159,7 @@ export const useUserActions = () => {
       toast.error("Authentication required");
       return false;
     }
-  
+
     try {
       const response = await fetch(`${url}/delete-course/${id}`, {
         method: "DELETE",
@@ -137,12 +167,12 @@ export const useUserActions = () => {
           Authorization: `Bearer ${authToken}`,
         },
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Deletion failed");
       }
-  
+
       return true;
     } catch (error) {
       throw error; // Propagate error to component
@@ -155,19 +185,19 @@ export const useUserActions = () => {
       toast.error("Authentication required");
       return null;
     }
-  
+
     try {
       const response = await fetch(`${url}/get-course-by-id/${id}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to fetch product");
       }
-  
+
       return await response.json();
     } catch (error) {
       throw error; // Propagate error to component
@@ -180,30 +210,125 @@ export const useUserActions = () => {
       toast.error("Authentication required");
       return null;
     }
-  
+
     try {
-      const response = await fetch(`${url}/affiliate-sales/${id}?page=1&limit=10`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
-  
+      const response = await fetch(
+        `${url}/affiliate-sales/${id}?page=1&limit=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to fetch sales");
       }
-  
+
       return await response.json();
     } catch (error) {
       throw error; // Propagate error to component
     }
   };
 
-  return { deleteUser, createProduct,deleteProduct,getProductById,getAffiliateSales,updateProduct };
+  const updateUserStatus = async (id: string, updatedData: Update) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${url}/update-user-status/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update user status");
+      }
+
+      return true;
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  const coursePurchase = async (purChasedData: Purchased) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${url}/course-purchase`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(purChasedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to purchase course");
+      }
+
+      return true;
+    } catch (error) {
+      throw error; // Propagate error
+    }
+  };
+
+  const activateAffiliate = async () => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${url}/activate-affiliate`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to activate affiliate");
+      }
+
+      return true;
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  return {
+    deleteUser,
+    createProduct,
+    deleteProduct,
+    getProductById,
+    getAffiliateSales,
+    updateProduct,
+    updateUserStatus,
+    coursePurchase,
+    activateAffiliate,
+  };
 };
 
 const extractErrorMessageFromHTML = (html: string) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  return doc.querySelector('pre')?.textContent || 'Unknown error';
+  const doc = parser.parseFromString(html, "text/html");
+  return doc.querySelector("pre")?.textContent || "Unknown error";
 };
