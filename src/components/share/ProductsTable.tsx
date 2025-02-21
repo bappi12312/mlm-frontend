@@ -23,14 +23,18 @@ const ProductsTable = ({data,heading}: Props) => {
 
   const handleDelete = async(id: string) => {
     try {
-      console.log(id)
       await deleteProduct(id)
+      toast.success("Course deleted successfully!");
     } catch (error) {
       console.error("Error in handleDelete:", error); // Log the error
       toast.error("Failed to delete course");
     }
   }
   return (
+    <>
+    <div className="flex justify-center h-full">
+      <h1 className="text-2xl md:text-3xl font-bold text-main">Active Courses</h1>
+    </div>
     <Table>
       <TableCaption>A list of your recent course.</TableCaption>
       <TableHeader>
@@ -62,6 +66,7 @@ const ProductsTable = ({data,heading}: Props) => {
         </TableRow> */}
       </TableFooter>
     </Table>
+    </>
   )
 }
 
