@@ -14,7 +14,7 @@ import {
 import { User } from "@/lib/store/features/authSlice";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Update, useUserActions } from "@/lib/store/hooks/useUserActions";
+import { useUserActions } from "@/lib/store/hooks/useUserActions";
 import {
   Select,
   SelectContent,
