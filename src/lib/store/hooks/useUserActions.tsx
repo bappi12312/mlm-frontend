@@ -3,6 +3,7 @@ import { url } from "../features/api/authApi";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { User } from "../features/authSlice";
+import { CoursePakage, Payment,PaymentRequest } from "@/types/types";
 
 export interface Update {
   status?: "Active" | "Inactive";
@@ -20,12 +21,14 @@ interface UserActions {
   deleteUser: (id: string) => Promise<boolean>;
   createProduct: (formData: FormData) => Promise<boolean>;
   deleteProduct: (id: string) => Promise<boolean>;
-  getProductById: (id: string) => Promise<any>;
-  getAffiliateSales: (id: string) => Promise<any>;
+  getProductById: (id: string) => Promise<CoursePakage | null>;
+  getAffiliateSales: (id: string) => Promise<CoursePakage[] | null>;
   updateProduct: (id: string, formData: FormData) => Promise<boolean>;
   updateUserStatus: (id: string, updatedData: Update) => Promise<boolean>;
   coursePurchase: (purChasedData: Purchased) => Promise<boolean>;
   activateAffiliate: () => Promise<boolean>;
+  getAllPayment: () => Promise<Payment[] | null>;
+  getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
 }
 
 export const useUserActions = (): UserActions => {
@@ -314,6 +317,57 @@ export const useUserActions = (): UserActions => {
     }
   };
 
+  const getAllPayment = async () => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${url}/getAllPayment`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch payment");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
+  const getAllPaymentRequest = async () => {
+
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${url}/get-allPayment-request`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch payment request");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  };
+
   return {
     deleteUser,
     createProduct,
@@ -324,6 +378,8 @@ export const useUserActions = (): UserActions => {
     updateUserStatus,
     coursePurchase,
     activateAffiliate,
+    getAllPayment,
+    getAllPaymentRequest,
   };
 };
 

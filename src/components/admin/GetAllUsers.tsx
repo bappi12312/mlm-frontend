@@ -5,7 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAuthFromCookies } from "@/lib/utils/cookieUtils";
 import useSWR from "swr";
 import { User } from "@/lib/store/features/authSlice";
-import { Payment } from "@/types/types";
+import { Payment,PaymentRequest } from "@/types/types";
+import PaymentTable from "../share/PaymentTable";
+import PaymentRequestTable from "../share/PaymentRequestTable";
 
 export const fetcher = async (url: string) => {
   const response = await fetch(url, {
@@ -25,8 +27,15 @@ const GetAllUsers = () => {
     isLoading: paymentLoading,
   } = useSWR(`${url}/getAllPayment`, fetcher);
 
+  const {
+    data: requestPaymentData,
+    error: requestPaymentError,
+    isLoading: requestPaymentLoading,
+  } = useSWR(`${url}/get-allPayment-request`, fetcher);
+
   const users: User[] = data?.data?.users;
   const usersPayment: Payment[] = paymentData?.data?.payments;
+  const paymentRequest: PaymentRequest[] = requestPaymentData?.data?.paymentRequestes || [];
 
   const paymentLength = usersPayment?.length;
 
@@ -69,16 +78,36 @@ const GetAllUsers = () => {
       </div>
       <div className="overflow-x-auto container mx-auto">
       <Tabs defaultValue="users" >
-        <TabsList className="bg-main flex justify-center items-center">
+        <TabsList className="bg-main flex justify-center items-center ">
           <TabsTrigger value="users" name="users">Users</TabsTrigger>
           <TabsTrigger value="payments" name="payments">Payments</TabsTrigger>
+          <TabsTrigger value="paymentsRequest" name="paymentsRequest">Request</TabsTrigger>
         </TabsList>
         <TabsContent className="mt-8" value="users">
           <UsersTable data={users || []} heading={heading} />
         </TabsContent>
-        {/* <TabsContent name="payments">
-          <UsersTable data={usersPayment || []} heading={["Name", "Amount"]} />
-        </TabsContent> */}
+        {
+      paymentLoading ? (
+        <div className="text-center text-3xl flex justify-center items-center text-main">
+          Loading...
+        </div>
+      ) : paymentError  ? ( <div>Error: something went worng to get payments</div> ) : (
+        <TabsContent value="payments">
+          <PaymentTable data={usersPayment || []} heading={["Name", "Amount"]} />
+        </TabsContent>
+      )
+        }
+        <TabsContent value="paymentsRequest">
+         {
+          requestPaymentLoading ? (
+            <div className="text-center text-3xl flex justify-center items-center text-main">
+              Loading...
+            </div>
+          ) : requestPaymentError  ? ( <div>Error: something went worng to get payments</div> ) : (
+            <PaymentRequestTable data={paymentRequest || []} heading={["Name", "Amount"]} />
+          )
+         }
+        </TabsContent>
       </Tabs>
       </div>
     </div>

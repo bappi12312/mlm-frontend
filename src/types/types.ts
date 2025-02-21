@@ -49,9 +49,16 @@ export interface Payment {
   Amount: number;
   FromNumber: string;
   PaymentDate: string;
-  updatedAt: string;
-  createdAt: string;
   ToNumber: string;
   user: string;
-  __v: number;
+}
+
+export interface PaymentRequest {
+  _id: string;
+  type: string;
+  number: string;
+  confirmNumber: string;
+  date: string;
+  user: string;
+  status: string;
 }
