@@ -1,4 +1,3 @@
-"use client";
 import { useUserActions } from "@/lib/store/hooks/useUserActions";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";

@@ -6,7 +6,7 @@ export interface CoursePakage {
   status?: string;
   category: string;
   createdAt?: Date;
-  _id?: string;
+  _id?: string | null;
 }
 
 export interface Sale {
