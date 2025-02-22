@@ -23,8 +23,10 @@ const ProductsCard = ({product}: {product: CoursePakage}) => {
         courseId: product._id || "",
       }
     const res = await coursePurchase(givenData)
-    if(res){
+    if(res === true){
       toast.success("Course purchased successfully")
+    }else{
+      toast.error("Failed to purchase course")
     }
 
     } catch (error) {
