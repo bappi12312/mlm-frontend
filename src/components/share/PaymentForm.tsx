@@ -63,8 +63,9 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                   <FormControl>
                     <Input
                       placeholder="Enter affiliate code"
-                      className="text-black"
+                      className="text-gray-400"
                       {...field}
+                      
                     />
                   </FormControl>
                   <FormMessage />

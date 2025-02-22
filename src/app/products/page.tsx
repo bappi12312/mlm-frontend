@@ -11,7 +11,7 @@ import useSWR from "swr";
 
 const ProductPage = () => {
   const { data, error, isLoading } = useSWR(`${url}/get-all-courses?page=1&limit=10&status=active&sort=-createdAt`, fetcher);
-  console.log(data)
+  
   const courses : CoursePakage[] = data?.data?.courses
 
   if (isLoading) return <div>Loading...</div>

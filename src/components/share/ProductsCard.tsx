@@ -1,6 +1,4 @@
 import * as React from "react"
- 
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -11,15 +9,30 @@ import {
 } from "@/components/ui/card"
 import CardImage from "./CardImage"
 import { CoursePakage } from "@/types/types";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import PaymentForm from "./PaymentForm";
+import { useUserActions } from "@/lib/store/hooks/useUserActions";
+import { toast } from "sonner";
 
 const ProductsCard = ({product}: {product: CoursePakage}) => {
+  const {coursePurchase} = useUserActions()
+  const handleFormSubmit = async(data: { affiliateCode: string }) => {
+    // Handle payment submission here
+    try {
+      const givenData = {
+        affiliateCode: data.affiliateCode,
+        courseId: product._id || "",
+      }
+    const res = await coursePurchase(givenData)
+    if(res){
+      toast.success("Course purchased successfully")
+    }
+
+    } catch (error) {
+      console.error("Error submitting payment:", error)
+      toast.error("Error submitting payment")
+    }
+
+  }
   return (
     <Card className="bg-black text-white">
     <CardHeader>
@@ -43,33 +56,7 @@ const ProductsCard = ({product}: {product: CoursePakage}) => {
       </form>
     </CardContent>
     <CardFooter className="w-full flex">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="flex-1" variant={"destructive"}>
-              Pay now
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-black text-white sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Payment Information</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="affiliateCode" className="text-right">
-                  Affiliate Code
-                </label>
-                <input
-                  id="affiliateCode"
-                  placeholder="Enter affiliate code"
-                  className="col-span-3 p-2 text-black rounded"
-                />
-              </div>
-              <Button type="submit" variant="destructive">
-                Confirm Payment
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+    <PaymentForm product={product} onFormSubmit={handleFormSubmit} />
       </CardFooter>
   </Card>
   );
