@@ -7,8 +7,9 @@ import { UserCheck, UserRoundPen, BarChart } from "lucide-react";
 import ProfileDetals from "@/components/profile/ProfileDetals";
 import GetAllUsers from "@/components/admin/GetAllUsers";
 import ManageAllProducts from "@/components/manageProducts/ManageAllProducts";
+import AffiliateSales from "@/components/affiliates/AffiliateSales";
 
-type TabID = "profile" | "manage-users" | "analytics" | "manage-products";
+type TabID = "profile" | "manage-users" | "affiliatesSales" | "manage-products";
 
 interface Tab {
   id: TabID;
@@ -26,7 +27,7 @@ const AdminPage = () => {
     { id: "profile", label: "Profile", icon: UserCheck, showWhen: isAuthenticated },
     { id: "manage-users", label: "Manage Users", icon: UserRoundPen, showWhen: user?.role === "admin" },
     { id: "manage-products", label: "Manage Products", icon: UserRoundPen, showWhen: user?.role === "admin" },
-    { id: "analytics", label: "Analytics", icon: BarChart, showWhen: isAuthenticated },
+    { id: "affiliatesSales", label: "Sales", icon: BarChart, showWhen: isAuthenticated && user?.isAffiliate },
   ].filter((tab) => tab.showWhen) as Tab[];
 
   useEffect(() => {
@@ -69,6 +70,7 @@ const AdminPage = () => {
         {activeTab === "profile" && <ProfileDetals />}
         {activeTab === "manage-users" && <GetAllUsers />}
         {activeTab === "manage-products" && <ManageAllProducts />}
+        {activeTab === "affiliatesSales" && <AffiliateSales />}
       </div>
     </div>
   );

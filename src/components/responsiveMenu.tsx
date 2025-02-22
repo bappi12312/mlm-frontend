@@ -1,11 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import React from "react";
+import { Button } from "./ui/button";
 
 interface ResponsiveMenuProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isAuthenticated: boolean;
+  handleLogout: () => void;
 }
 
 interface MenuItem {
@@ -15,14 +17,13 @@ interface MenuItem {
   showWhen?: boolean;
 }
 
-const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ open, setOpen, isAuthenticated }) => {
+const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ open, setOpen, isAuthenticated, handleLogout }) => {
   const NavbarMenu: MenuItem[] = [
     { id: 1, title: "Home", link: "/" },
     { id: 4, title: "Products", link: "/products", showWhen: isAuthenticated },
     { id: 2, title: "Dashboard", link: "/dashboard", showWhen: isAuthenticated },
     { id: 3, title: "Login", link: "/login", showWhen: !isAuthenticated },
   ];
-
   return (
     <AnimatePresence mode="wait">
       {open && (

@@ -66,16 +66,17 @@ const Navbar = () => {
 
           {/* User & Logout Section */}
           <div className="flex items-center gap-6">
-            {isAuthenticated && (
+            {(isAuthenticated === true) && (
               <Button
+              size={"sm"}
                 onClick={handleLogout}
-                className="text-white font-semibold hidden md:block duration-200"
+                className="text-white font-semibold w-[50px] sm: duration-200"
                 variant={"destructive"}
               >
                 Logout
               </Button>
             )}
-            <button>
+            <button className="hidden md:block">
               <Avatar>
                 <AvatarImage src={user?.photo || "https://github.com/shadcn.png"} />
                 <AvatarFallback>CN</AvatarFallback>
@@ -91,7 +92,7 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile Menu Section */}
-      <ResponsiveMenu open={open} setOpen={setOpen} isAuthenticated={isAuthenticated} />
+      <ResponsiveMenu open={open} setOpen={setOpen} isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
     </div>
   );
 };

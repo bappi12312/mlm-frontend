@@ -2,6 +2,7 @@ import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
+  _id: string;
   name: string;
   email: string;
   role: string;
@@ -12,10 +13,15 @@ export interface User {
   status: string;
   photo?: string;
   downline?: string[];
-  _id: string;
   transactions?: string[];
   createdAt: string;
   updatedAt: string;
+  isPayForCourse?: boolean;
+  isPay: boolean;
+  isAffiliate: boolean;
+  affiliateBalance: number;
+  affiliateSales: [];
+  uplines: string[];
 }
 
 interface UserLoggedInPayload {
