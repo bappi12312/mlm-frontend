@@ -24,6 +24,12 @@ export interface User {
   transactions?: string[];
   createdAt: string;
   updatedAt: string;
+  isPayForCourse?: boolean;
+  isPay: boolean;
+  isAffiliate: boolean;
+  affiliateBalance: number;
+  affiliateSales: [];
+  uplines: string[];
 }
 
 interface LoginData {
