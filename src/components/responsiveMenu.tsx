@@ -5,7 +5,6 @@ interface ResponsiveMenuProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isAuthenticated: boolean;
-  handleLogout: () => void;
 }
 
 interface MenuItem {
@@ -15,7 +14,7 @@ interface MenuItem {
   showWhen?: boolean;
 }
 
-const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ open, setOpen, isAuthenticated, handleLogout }) => {
+const ResponsiveMenu: React.FC<ResponsiveMenuProps> = ({ open, setOpen, isAuthenticated }) => {
   const NavbarMenu: MenuItem[] = [
     { id: 1, title: "Home", link: "/" },
     { id: 4, title: "Products", link: "/products", showWhen: isAuthenticated },

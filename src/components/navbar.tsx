@@ -92,7 +92,7 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile Menu Section */}
-      <ResponsiveMenu open={open} setOpen={setOpen} isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
+      <ResponsiveMenu open={open} setOpen={setOpen} isAuthenticated={isAuthenticated}/>
     </div>
   );
 };
