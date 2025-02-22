@@ -11,6 +11,13 @@ import {
 } from "@/components/ui/card"
 import CardImage from "./CardImage"
 import { CoursePakage } from "@/types/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 const ProductsCard = ({product}: {product: CoursePakage}) => {
   return (
@@ -36,8 +43,34 @@ const ProductsCard = ({product}: {product: CoursePakage}) => {
       </form>
     </CardContent>
     <CardFooter className="w-full flex">
-      <Button className="flex-1" variant={"destructive"}>pay now</Button>
-    </CardFooter>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="flex-1" variant={"destructive"}>
+              Pay now
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-black text-white sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Payment Information</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="affiliateCode" className="text-right">
+                  Affiliate Code
+                </label>
+                <input
+                  id="affiliateCode"
+                  placeholder="Enter affiliate code"
+                  className="col-span-3 p-2 text-black rounded"
+                />
+              </div>
+              <Button type="submit" variant="destructive">
+                Confirm Payment
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </CardFooter>
   </Card>
   );
 };

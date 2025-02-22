@@ -17,7 +17,6 @@ const AffiliateSales = () => {
       const res = (await getAffiliateSales(user?._id)) as {
         data: { sales: CoursePakage[] };
       } | null;
-      console.log(res);
       if (res !== null && res.data) {
         setSales(res.data.sales ?? []);
       }
