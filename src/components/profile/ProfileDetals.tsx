@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import PaymentRequested from "./PaymentRequested";
 import PaymentDistribution from "./PaymentDistribution";
 import Image from "next/image";
+import Link from "next/link";
 
 // Define the Inputs type for the form
 type Inputs = {
@@ -91,7 +92,16 @@ const ProfileDetals = () => {
                 <span className="text-emerald-700 font-bold">{user?.referalCode}</span>
                 {user?.status !== "Active" && " (This will work after you activate your account)"}
               </h1>
+              
             </div>
+            <div className="flex items-center mt-4 text-gray-200 flex-col">
+            {user && user?.pakageLink && user?.pakageLink?.length > 0 && user?.pakageLink?.map((link) => (
+              <Link className="px-2 text-xl font-bold text-emerald-700 flex flex-wrap" key={link._id} href={link.link}>
+                <span className="text-main font-bold mr-2">your package link:</span>
+               {link.link}
+              </Link>
+            ))}
+              </div>
           </div>
         </div>
       </div>

@@ -46,7 +46,9 @@ const GetAllUsers = () => {
     "Earnings",
     "Delete",
     "Action",
+    "link",
   ];
+
 
   if (isLoading)
     return (

@@ -12,6 +12,11 @@ export interface Update {
   isPayForCourse?: boolean;
 }
 
+export interface PackagelinkUpdate {
+  packageLink: string;
+  userId: string;
+}
+
 interface Purchased {
   courseId: string;
   affiliateCode: string;
@@ -25,7 +30,7 @@ interface UserActions {
   getAffiliateSales: (id: string) => Promise<CoursePakage[] | null>;
   updateProduct: (id: string, formData: FormData) => Promise<boolean>;
   updateUserStatus: (id: string, updatedData: Update) => Promise<boolean>;
-  updateUserPakageLink: (updatedData: Update) => Promise<User | null>;
+  updateUserPakageLink: (updatedData: PackagelinkUpdate) => Promise<User | null>;
   coursePurchase: (purChasedData: Purchased) => Promise<boolean>;
   activateAffiliate: () => Promise<boolean>;
   getAllPayment: () => Promise<Payment[] | null>; 
@@ -264,7 +269,7 @@ export const useUserActions = (): UserActions => {
     }
   };
 
-  const updateUserPakageLink = async (updatedData: Update) => {
+  const updateUserPakageLink = async (updatedData: PackagelinkUpdate) => {
     const authToken = getAuthFromCookies()?.accessToken;
     if (!authToken) {
       toast.error("Authentication required");
@@ -272,7 +277,7 @@ export const useUserActions = (): UserActions => {
     }
 
     try {
-      const response = await fetch(`${url}/update-user-status`, {
+      const response = await fetch(`${url}/update-pakage-link`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
