@@ -8,6 +8,7 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
 import { deleteCookie, getCookie } from "cookies-next";
+import { Link } from "@/types/types";
 
 export interface User {
   _id: string;
@@ -30,6 +31,7 @@ export interface User {
   affiliateBalance: number;
   affiliateSales: [];
   uplines: string[];
+  pakageLink: Link[];
 }
 
 interface LoginData {
@@ -37,6 +39,7 @@ interface LoginData {
   accessToken: string;
   refreshToken: string;
 }
+
 
 interface LoginResponse {
   statusCode: number;

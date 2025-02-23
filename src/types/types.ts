@@ -21,6 +21,12 @@ export interface Sale {
   __v: number;
 }
 
+export interface Link {
+  _id: string;
+  link: string;
+  status: string;
+}
+
 export interface User {
   _id: string;
   name: string;
@@ -42,6 +48,7 @@ export interface User {
   affiliateBalance: number;
   affiliateSales: [];
   uplines: string[];
+  pakageLink: Link[];
 }
 
 export interface Payment {

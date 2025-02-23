@@ -2,7 +2,7 @@ import { getAuthFromCookies } from "@/lib/utils/cookieUtils";
 import { url } from "../features/api/authApi";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
-import { User } from "../features/authSlice";
+import { User } from "@/types/types";
 import { CoursePakage, Payment,PaymentRequest } from "@/types/types";
 
 export interface Update {
@@ -25,9 +25,10 @@ interface UserActions {
   getAffiliateSales: (id: string) => Promise<CoursePakage[] | null>;
   updateProduct: (id: string, formData: FormData) => Promise<boolean>;
   updateUserStatus: (id: string, updatedData: Update) => Promise<boolean>;
+  updateUserPakageLink: (updatedData: Update) => Promise<User | null>;
   coursePurchase: (purChasedData: Purchased) => Promise<boolean>;
   activateAffiliate: () => Promise<boolean>;
-  getAllPayment: () => Promise<Payment[] | null>;
+  getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
 }
 
@@ -263,6 +264,34 @@ export const useUserActions = (): UserActions => {
     }
   };
 
+  const updateUserPakageLink = async (updatedData: Update) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${url}/update-user-status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update user status");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  }
+
   const coursePurchase = async (purChasedData: Purchased) => {
     const authToken = getAuthFromCookies()?.accessToken;
     if (!authToken) {
@@ -380,6 +409,7 @@ export const useUserActions = (): UserActions => {
     activateAffiliate,
     getAllPayment,
     getAllPaymentRequest,
+    updateUserPakageLink,
   };
 };
 

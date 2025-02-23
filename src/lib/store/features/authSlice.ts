@@ -1,4 +1,5 @@
 import { clearAuthCookies, setAuthCookies } from "@/lib/utils/cookieUtils";
+import { Link } from "@/types/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
@@ -22,6 +23,7 @@ export interface User {
   affiliateBalance: number;
   affiliateSales: [];
   uplines: string[];
+  pakageLink: Link[];
 }
 
 interface UserLoggedInPayload {
