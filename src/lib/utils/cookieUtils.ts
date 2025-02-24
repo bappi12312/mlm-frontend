@@ -1,7 +1,6 @@
 // utils/cookieUtils.ts
 import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import { User } from "../store/features/authSlice";
-import { Exo } from "next/font/google";
 
 // ✅ Set cookies on the client side
 // lib/utils/cookieUtils.ts

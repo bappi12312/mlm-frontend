@@ -35,6 +35,7 @@ interface UserActions {
   activateAffiliate: (id : string) => Promise<boolean>;
   getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
+  userCommisson: (id: string) => Promise<number | null>;
 }
 
 export const useUserActions = (): UserActions => {
@@ -440,6 +441,7 @@ export const useUserActions = (): UserActions => {
     getAllPayment,
     getAllPaymentRequest,
     updateUserPakageLink,
+    userCommisson
   };
 };
 

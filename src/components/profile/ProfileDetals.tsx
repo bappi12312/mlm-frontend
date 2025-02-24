@@ -4,7 +4,6 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import PaymentRequested from "./PaymentRequested";
-import PaymentDistribution from "./PaymentDistribution";
 import Image from "next/image";
 import Link from "next/link";
 import {
