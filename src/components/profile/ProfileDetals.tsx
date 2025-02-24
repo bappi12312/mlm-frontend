@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -43,7 +43,7 @@ const ProfileDetals = () => {
       reset();
     } catch (error: unknown) {
       console.error("Submission failed", error);
-      toast.error( "Submission failed. Please try again.");
+      toast.error("Submission failed. Please try again.");
     }
   };
 
@@ -70,37 +70,38 @@ const ProfileDetals = () => {
             <h1 className="text-xl font-semibold text-white capitalize">
               {user?.name}
             </h1>
-
+            // After (if the error is in this line)
             <p className="py-2 text-gray-400">
-              {user?.status === "Active" 
+              {user?.status === "Active"
                 ? "Your account is fully activated!"
                 : "Activate your account to enable referral features"}
             </p>
-
             <div className="flex items-center mt-4 text-gray-200">
               <h1 className="px-2 text-sm">Status: {user?.status}</h1>
-              <span className={user?.status === "Active" ? "text-green-500" : "text-red-500"}>
+              <span
+                className={
+                  user?.status === "Active" ? "text-green-500" : "text-red-500"
+                }
+              >
                 {user?.status === "Active" ? "🟢" : "🔴"}
               </span>
             </div>
-
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">Earnings: {user?.earnings?.toFixed(2)}</h1>
+              <h1 className="px-2 text-sm">
+                Earnings: {user?.earnings?.toFixed(2)}
+              </h1>
             </div>
-
             <div className="flex items-center mt-4 text-gray-200">
               <h1 className="px-2 text-sm break-all">{user?.email}</h1>
             </div>
-
             <div className="flex items-center mt-4 text-gray-200">
               <h1 className="px-2 text-sm">
-                Referral code: {" "}
+                Referral code:{" "}
                 <span className="text-emerald-400 font-mono">
                   {user?.referalCode}
                 </span>
               </h1>
             </div>
-
             {user && user?.pakageLink?.length > 0 && (
               <div className="mt-4 space-y-2">
                 {user.pakageLink.map((link) => (
@@ -116,17 +117,19 @@ const ProfileDetals = () => {
                 ))}
               </div>
             )}
-
             {/* Activate Account Button */}
             {user?.status !== "Active" && (
               <div className="mt-6">
-                <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
+                <Dialog
+                  open={isFirstModalOpen}
+                  onOpenChange={setIsFirstModalOpen}
+                >
                   <DialogTrigger asChild>
                     <Button className="w-full bg-green-600 hover:bg-green-700 text-lg">
                       Activate Account
                     </Button>
                   </DialogTrigger>
-                  
+
                   {/* First Modal - Payment Instructions */}
                   <DialogContent className="bg-gray-800 text-white max-w-md">
                     <DialogHeader>
@@ -146,7 +149,7 @@ const ProfileDetals = () => {
                         </div>
                       </div>
                       <div className="flex flex-col gap-3">
-                        <Button 
+                        <Button
                           onClick={() => {
                             setIsFirstModalOpen(false);
                             setIsSecondModalOpen(true);
@@ -187,12 +190,12 @@ const ProfileDetals = () => {
                   type="number"
                   placeholder="Your Mobile Number"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
-                  {...register("FromNumber", { 
+                  {...register("FromNumber", {
                     required: "Your number is required",
                     minLength: {
                       value: 11,
-                      message: "Must be a valid BD number"
-                    }
+                      message: "Must be a valid BD number",
+                    },
                   })}
                 />
                 {errors.FromNumber && (
@@ -207,10 +210,10 @@ const ProfileDetals = () => {
                   type="number"
                   placeholder="Receiver's Number (01795944731)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
-                  {...register("ToNumber", { 
+                  {...register("ToNumber", {
                     required: "Receiver number is required",
-                    validate: value => 
-                      value === 1795944731 || "Must be our payment number"
+                    validate: (value) =>
+                      value === 1795944731 || "Must be our payment number",
                   })}
                 />
                 {errors.ToNumber && (
@@ -225,12 +228,12 @@ const ProfileDetals = () => {
                   type="number"
                   placeholder="Amount (৳100)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
-                  {...register("Amount", { 
+                  {...register("Amount", {
                     required: "Amount is required",
                     min: {
                       value: 100,
-                      message: "Minimum amount is  100"
-                    }
+                      message: "Minimum amount is  100",
+                    },
                   })}
                 />
                 {errors.Amount && (
@@ -242,8 +245,8 @@ const ProfileDetals = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-green-600 hover:bg-green-700"
                 disabled={isLoading}
               >
