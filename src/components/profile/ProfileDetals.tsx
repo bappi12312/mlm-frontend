@@ -85,7 +85,7 @@ const ProfileDetals = () => {
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">Earnings: ৳{user?.earnings?.toFixed(2)}</h1>
+              <h1 className="px-2 text-sm">Earnings: {user?.earnings?.toFixed(2)}</h1>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
@@ -137,7 +137,7 @@ const ProfileDetals = () => {
                     <div className="space-y-6">
                       <div className="text-center">
                         <p className="text-gray-300 mb-4">
-                          Please send ৳100 to one of these numbers:
+                          Please send 100 to one of these numbers:
                         </p>
                         <div className="space-y-3 font-mono">
                           <p>Bkash: 01795944731</p>
