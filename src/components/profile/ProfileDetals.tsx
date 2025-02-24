@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -6,54 +7,57 @@ import PaymentRequested from "./PaymentRequested";
 import PaymentDistribution from "./PaymentDistribution";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-// Define the Inputs type for the form
 type Inputs = {
   FromNumber: number;
   ToNumber: number;
   Amount: number;
 };
 
-// // Define the User type for type safety
-// interface User {
-//   photo?: string;
-//   name: string;
-//   status: string;
-//   earnings: number;
-//   email: string;
-//   referalCode: string;
-// }
-
 const ProfileDetals = () => {
   const { user } = useAppSelector((state) => state.auth);
+  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<Inputs>();
 
-  const [paymentCreation, { isLoading}] = usePaymentCreationMutation();
+  const [paymentCreation, { isLoading }] = usePaymentCreationMutation();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       const result = await paymentCreation(data).unwrap();
-      toast.success(result?.message || "Your response has been successfully submitted. Please wait for admin confirmation.");
-    } catch (error) {
-      console.log(error);
-      toast.error("Your response submission failed.");
+      toast.success(result?.message || "Submission successful!");
+      setIsSecondModalOpen(false);
+      reset();
+    } catch (error: unknown) {
+      console.error("Submission failed", error);
+      toast.error( "Submission failed. Please try again.");
     }
   };
 
   return (
     <div className="w-full h-full flex justify-center items-center flex-col gap-8">
+      {/* Profile Card */}
       <div className="w-full md:w-1/2 bg-gray-800 rounded-lg">
         <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800">
           <Image
             className="object-cover object-center w-full h-56"
             width={300}
             height={300}
-            src={user?.photo || "https://imgs.search.brave.com/m4DXOI6PIc48H-SPuj0r0dPrMAtU6QI_SR1HaGBX3Ak/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9wbGF5/LWxoLmdvb2dsZXVz/ZXJjb250ZW50LmNv/bS90eFpnOERHX2Z1/WURkaGlIMGhhTFlk/NnpIcG9rRnB6WFA5/Z2JfM2xqVkhJOFZl/VnpDa015LVlGWjkt/ZnhYTV9jSHV3bD13/NTI2LWgyOTYtcnc.jpeg"}
+            src={user?.photo || "/default-avatar.jpg"}
             alt="avatar"
           />
 
@@ -69,97 +73,206 @@ const ProfileDetals = () => {
             </h1>
 
             <p className="py-2 text-gray-400">
-              If you want to enable the referral feature, please activate your account
-              <span className="text-white capitalize ml-1">{user?.name}</span>
+              {user?.status === "Active" 
+                ? "Your account is fully activated!"
+                : "Activate your account to enable referral features"}
             </p>
 
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">{user?.status}</h1>
-              <h2>{user?.status === "Active" ? "🟢" : "🔴"}</h2>
+              <h1 className="px-2 text-sm">Status: {user?.status}</h1>
+              <span className={user?.status === "Active" ? "text-green-500" : "text-red-500"}>
+                {user?.status === "Active" ? "🟢" : "🔴"}
+              </span>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">Earnings: {user?.earnings}</h1>
+              <h1 className="px-2 text-sm">Earnings: ৳{user?.earnings?.toFixed(2)}</h1>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">{user?.email}</h1>
+              <h1 className="px-2 text-sm break-all">{user?.email}</h1>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
               <h1 className="px-2 text-sm">
-                Your referral code:{" "}
-                <span className="text-emerald-700 font-bold">{user?.referalCode}</span>
-                {user?.status !== "Active" && " (This will work after you activate your account)"}
+                Referral code: {" "}
+                <span className="text-emerald-400 font-mono">
+                  {user?.referalCode}
+                </span>
               </h1>
-              
             </div>
-            <div className="flex items-center mt-4 text-gray-200 flex-col">
-            {user && user?.pakageLink && user?.pakageLink?.length > 0 && user?.pakageLink?.map((link) => (
-              <Link className="px-2 text-xl font-bold text-emerald-700 flex flex-wrap" key={link._id} href={link.link}>
-                <span className="text-main font-bold mr-2">your package link:</span>
-               {link.link}
-              </Link>
-            ))}
+
+            {user && user?.pakageLink?.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {user.pakageLink.map((link) => (
+                  <Link
+                    key={link._id}
+                    href={link.link}
+                    className="px-2 text-emerald-400 hover:text-emerald-300 break-all"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Package Link: {link.link}
+                  </Link>
+                ))}
               </div>
+            )}
+
+            {/* Activate Account Button */}
+            {user?.status !== "Active" && (
+              <div className="mt-6">
+                <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full bg-green-600 hover:bg-green-700 text-lg">
+                      Activate Account
+                    </Button>
+                  </DialogTrigger>
+                  
+                  {/* First Modal - Payment Instructions */}
+                  <DialogContent className="bg-gray-800 text-white max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl text-center mb-4">
+                        Activation Instructions
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <p className="text-gray-300 mb-4">
+                          Please send ৳100 to one of these numbers:
+                        </p>
+                        <div className="space-y-3 font-mono">
+                          <p>Bkash: 01795944731</p>
+                          <p>Nagad: 01795944731</p>
+                          <p>Rocket: 01795944731</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <Button 
+                          onClick={() => {
+                            setIsFirstModalOpen(false);
+                            setIsSecondModalOpen(true);
+                          }}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                          I've Sent Payment - Next
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsFirstModalOpen(false)}
+                          className="w-full text-gray-300 hover:bg-gray-700"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="w-full md:w-1/2 rounded-lg space-y-8">
-        <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1 text-center">
-          <h1>To activate your account, please invest just 100 Taka to the given number:</h1>
-          <div>
-            <h2>Bkash: 01795944731</h2>
-            <h2>Nogod: 01795944731</h2>
-            <h2>Rocket: 01795944731</h2>
-          </div>
-        </div>
+      {/* Payment Form Modal */}
+      <Dialog open={isSecondModalOpen} onOpenChange={setIsSecondModalOpen}>
+        <DialogContent className="bg-gray-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center mb-4">
+              Payment Details
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <input
+                  type="number"
+                  placeholder="Your Mobile Number"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("FromNumber", { 
+                    required: "Your number is required",
+                    minLength: {
+                      value: 11,
+                      message: "Must be a valid BD number"
+                    }
+                  })}
+                />
+                {errors.FromNumber && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors.FromNumber.message}
+                  </span>
+                )}
+              </div>
 
-        {/* Invest form */}
-        <div>
-          <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1">
-            <h1 className="text-center font-bold text-xl md:text-2xl">After successfully investing, please fill out this form:</h1>
-          </div>
+              <div>
+                <input
+                  type="number"
+                  placeholder="Receiver's Number (01795944731)"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("ToNumber", { 
+                    required: "Receiver number is required",
+                    validate: value => 
+                      value === 1795944731 || "Must be our payment number"
+                  })}
+                />
+                {errors.ToNumber && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors.ToNumber.message}
+                  </span>
+                )}
+              </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1">
-            <div className="flex flex-col gap-4">
-              <input
-                type="number"
-                placeholder="From Number"
-                className="w-full p-2 bg-gray-700 rounded-lg"
-                {...register("FromNumber", { required: "From Number is required" })}
-              />
-              {errors.FromNumber && <span className="text-red-500">{errors.FromNumber.message}</span>}
-
-              <input
-                type="number"
-                placeholder="To Number"
-                className="w-full p-2 bg-gray-700 rounded-lg"
-                {...register("ToNumber", { required: "To Number is required" })}
-              />
-              {errors.ToNumber && <span className="text-red-500">{errors.ToNumber.message}</span>}
-
-              <input
-                type="number"
-                placeholder="Amount"
-                className="w-full p-2 bg-gray-700 rounded-lg"
-                {...register("Amount", { required: "Amount is required" })}
-              />
-              {errors.Amount && <span className="text-red-500">{errors.Amount.message}</span>}
+              <div>
+                <input
+                  type="number"
+                  placeholder="Amount (৳100)"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("Amount", { 
+                    required: "Amount is required",
+                    min: {
+                      value: 100,
+                      message: "Minimum amount is ৳100"
+                    }
+                  })}
+                />
+                {errors.Amount && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors.Amount.message}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="flex justify-center">
-              <button className="px-4 py-2 mt-4 text-white bg-green-500 rounded-lg hover:bg-green-600" disabled={isLoading}>
-                {isLoading ? "Submitting..." : "Submit"}
-              </button>
+            <div className="flex flex-col gap-3">
+              <Button 
+                type="submit" 
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="animate-pulse">Processing...</span>
+                ) : (
+                  "Submit Payment Details"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsSecondModalOpen(false)}
+                className="w-full text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
 
-          {user?.status === "Active" && Number(user?.earnings) > 0 && <PaymentRequested />}
-          {user?.status === "Active" && <PaymentDistribution />}
+      {/* Payment Components for Active Users */}
+      {user?.status === "Active" && (
+        <div className="w-full md:w-1/2 space-y-8">
+          {Number(user?.earnings) > 0 && <PaymentRequested />}
         </div>
-      </div>
+      )}
     </div>
   );
 };

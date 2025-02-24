@@ -1,94 +1,142 @@
+import { useState } from 'react';
 import { useRequestPaymentMutation } from "@/lib/store/features/api/authApi";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-// Define the input types for better safety
 type Inputs = {
   type: string;
   number: number;
   confirmNumber: number;
 };
 
-type ApiError = {
-  message: string;
-};
-
 const PaymentRequested = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Inputs>();
-
-  // Extract mutation status states
-  const [requestPayment, { isLoading, isError, isSuccess }] = useRequestPaymentMutation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<Inputs>();
+  const [requestPayment, { isLoading }] = useRequestPaymentMutation();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (data.number !== data.confirmNumber) {
-      toast.error("Confirm number does not match.");
+      toast.error("Confirmation number doesn't match");
       return;
     }
 
     try {
       const result = await requestPayment(data).unwrap();
-      toast.success(
-        result?.message || "Your response has been submitted successfully. Please wait for admin confirmation. Your account will be active soon."
-      );
-    } catch (error) {
-      const typedError = error as ApiError;
-      console.error(typedError.message);
-      toast.error(typedError?.message || "Your response submission failed.");
+      toast.success(result?.message || "Payment request submitted successfully!");
+      setIsModalOpen(false);
+      reset();
+    } catch (error: unknown) {
+      console.error("Payment request failed", error);
+      toast.error("Payment request failed");
     }
   };
 
   return (
-    <div>
-      <div className="p-4 text-center text-xl font-bold">
-        <h1>To withdraw money, you must request it first.</h1>
-      </div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800 p-4 space-y-1"
-      >
-        <div className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Type"
-            className="w-full p-2 bg-gray-700 rounded-lg"
-            {...register("type", { required: "Type is required." })}
-          />
-          {errors.type && <span className="text-red-500">{errors.type.message}</span>}
+    <div className="w-full">
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogTrigger asChild>
+          <Button className="w-full bg-blue-600 hover:bg-blue-700">
+            Request Payment Withdrawal
+          </Button>
+        </DialogTrigger>
+
+        <DialogContent className="bg-gray-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center mb-4">
+              Payment Withdrawal Request
+            </DialogTitle>
+          </DialogHeader>
           
-          <input
-            type="number"
-            placeholder="Number"
-            className="w-full p-2 bg-gray-700 rounded-lg"
-            {...register("number", { required: "Number is required." })}
-          />
-          {errors.number && <span className="text-red-500">{errors.number.message}</span>}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Payment Type (e.g., Bkash, Nagad)"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("type", { 
+                    required: "Payment type is required",
+                    validate: value => 
+                      ["bkash", "nagad", "rocket"].includes(value.toLowerCase()) || 
+                      "Supported types: Bkash, Nagad, Rocket"
+                  })}
+                />
+                {errors.type && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors.type.message}
+                  </span>
+                )}
+              </div>
 
-          <input
-            type="number"
-            placeholder="Confirm Number"
-            className="w-full p-2 bg-gray-700 rounded-lg"
-            {...register("confirmNumber", { required: "Confirm number is required." })}
-          />
-          {errors.confirmNumber && <span className="text-red-500">{errors.confirmNumber.message}</span>}
-        </div>
+              <div>
+                <input
+                  type="number"
+                  placeholder="Your Mobile Number"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("number", { 
+                    required: "Number is required",
+                    minLength: {
+                      value: 11,
+                      message: "Must be a valid BD number"
+                    }
+                  })}
+                />
+                {errors.number && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors.number.message}
+                  </span>
+                )}
+              </div>
 
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            className="px-4 py-2 mt-4 text-white bg-green-500 rounded-lg hover:bg-green-600"
-            disabled={isLoading}
-          >
-            {isLoading ? "Submitting..." : "Submit"}
-          </button>
-        </div>
-      </form>
+              <div>
+                <input
+                  type="number"
+                  placeholder="Confirm Mobile Number"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("confirmNumber", { 
+                    required: "Confirmation is required",
+                  })}
+                />
+                {errors.confirmNumber && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors.confirmNumber.message}
+                  </span>
+                )}
+              </div>
+            </div>
 
-      {isError && <p className="text-red-500 text-center">There was an error submitting your request.</p>}
-      {isSuccess && <p className="text-green-500 text-center">Your request was successfully submitted!</p>}
+            <div className="flex flex-col gap-3">
+              <Button 
+                type="submit" 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="animate-pulse">Processing...</span>
+                ) : (
+                  "Submit Request"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                className="w-full text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -32,7 +32,7 @@ interface UserActions {
   updateUserStatus: (id: string, updatedData: Update) => Promise<boolean>;
   updateUserPakageLink: (updatedData: PackagelinkUpdate) => Promise<User | null>;
   coursePurchase: (purChasedData: Purchased) => Promise<boolean>;
-  activateAffiliate: () => Promise<boolean>;
+  activateAffiliate: (id : string) => Promise<boolean>;
   getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
 }
@@ -325,7 +325,7 @@ export const useUserActions = (): UserActions => {
     }
   };
 
-  const activateAffiliate = async () => {
+  const activateAffiliate = async (id : string) => {
     const authToken = getAuthFromCookies()?.accessToken;
     if (!authToken) {
       toast.error("Authentication required");
@@ -333,7 +333,7 @@ export const useUserActions = (): UserActions => {
     }
 
     try {
-      const response = await fetch(`${url}/activate-affiliate`, {
+      const response = await fetch(`${url}/activate-affiliate/${id}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -350,6 +350,31 @@ export const useUserActions = (): UserActions => {
       throw error; // Propagate error to component
     }
   };
+
+  const userCommisson = async (id: string) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${url}/get-user-commission/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch user commission");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  }
 
   const getAllPayment = async () => {
     const authToken = getAuthFromCookies()?.accessToken;
