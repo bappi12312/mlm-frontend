@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-type Inputs = {
+export type Inputs = {
   FromNumber: number;
   ToNumber: number;
   Amount: number;
