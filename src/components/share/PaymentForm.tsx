@@ -70,6 +70,20 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
     }
   }
 
+  const handleAffiliateSubmit = async (values: z.infer<typeof affiliateSchema>) => {
+    try {
+      // Wait for parent submission to complete
+      await onFormSubmit(values);
+      
+      toast.success("Payment completed successfully!");
+      setCurrentStep(0);
+      affiliateForm.reset();
+      paymentForm.reset();
+    } catch (error) {
+      // Handle errors from parent submission
+      toast.error("Failed to complete payment. Please try again.");
+    }
+  };
   const steps = [
     {
       title: "Payment Instructions",
@@ -178,7 +192,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
       title: "Affiliate Code",
       content: (
         <Form {...affiliateForm}>
-          <form onSubmit={affiliateForm.handleSubmit(onFormSubmit)} className="space-y-6">
+          <form onSubmit={affiliateForm.handleSubmit(handleAffiliateSubmit)} className="space-y-6">
             <FormField
               control={affiliateForm.control}
               name="affiliateCode"
@@ -190,29 +204,16 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                       placeholder="Enter affiliate code"
                       className="text-gray-400"
                       {...field}
+                      // Add this to ensure input updates
+                      value={field.value || ""}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setCurrentStep(1)}
-                type="button"
-              >
-                Back
-              </Button>
-              <Button 
-                type="submit" 
-                variant="destructive" 
-                className="w-full"
-              >
-                Confirm Payment
-              </Button>
-            </div>
+            {/* ... rest of the form ... */}
           </form>
         </Form>
       )
@@ -220,10 +221,12 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
   ]
 
   return (
-    <Dialog onOpenChange={() => {
-      setCurrentStep(0)
-      paymentForm.reset()
-      affiliateForm.reset()
+    <Dialog  onOpenChange={() => {
+      if (!open) {
+        setCurrentStep(0);
+        paymentForm.reset();
+        affiliateForm.reset();
+      }
     }}>
       <DialogTrigger asChild>
         <Button className="flex-1" variant={"destructive"}>

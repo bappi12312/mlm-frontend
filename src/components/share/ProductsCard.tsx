@@ -15,26 +15,28 @@ import { toast } from "sonner";
 
 const ProductsCard = ({product}: {product: CoursePakage}) => {
   const {coursePurchase} = useUserActions()
-  const handleFormSubmit = async(data: { affiliateCode: string }) => {
-    // Handle payment submission here
+  const handleFormSubmit = async (data: { affiliateCode: string }) => {
     try {
       const givenData = {
         affiliateCode: data.affiliateCode,
         courseId: product._id || "",
+      };
+      
+      const res = await coursePurchase(givenData);
+      
+      if (res === true) {
+        toast.success("Course purchased successfully");
+        return true; // Return success status
+      } else {
+        toast.error("Failed to purchase course");
+        return false; // Return failure status
       }
-    const res = await coursePurchase(givenData)
-    if(res === true){
-      toast.success("Course purchased successfully")
-    }else{
-      toast.error("Failed to purchase course")
-    }
-
     } catch (error) {
-      console.error("Error submitting payment:", error)
-      toast.error("Error submitting payment")
+      console.error("Error submitting payment:", error);
+      toast.error("Error submitting payment");
+      throw error; // Throw error to be caught in child component
     }
-
-  }
+  };
   return (
     <Card className="bg-black text-white">
     <CardHeader>
