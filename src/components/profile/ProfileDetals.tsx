@@ -229,7 +229,7 @@ const ProfileDetals = () => {
                     required: "Amount is required",
                     min: {
                       value: 100,
-                      message: "Minimum amount is ৳100"
+                      message: "Minimum amount is  100"
                     }
                   })}
                 />
