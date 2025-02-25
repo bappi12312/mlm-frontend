@@ -35,13 +35,17 @@ interface UserActions {
   activateAffiliate: (userId : string) => Promise<boolean | null>;
   getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
-  userCommisson: (id: string) => Promise<number | null>;
+  userCommisson: (id: string,data:{
+    amount: number
+  }) => Promise<number | null>;
   paymentConfirmation: (data: {userId: string, paymentId: string}) => Promise<User & Payment | null>;
   giveEarningsEachUser: (data : {
     userId : string,
     affiliateAmount? : number,
     amount? : number
   }) => Promise<boolean | null>
+  deletePaymentRequest: (id: string) => Promise<boolean | null>;
+  deleteAPayment: (id: string) => Promise<boolean | null>;
 }
 
 export const useUserActions = (): UserActions => {
@@ -104,6 +108,121 @@ export const useUserActions = (): UserActions => {
       return false;
     }
   };
+
+  const deleteAPayment = async (id: string) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+
+    try {
+      // Optimistic update: remove user immediately from UI
+      mutate(
+        `${url}/getAllPayment`,
+        (currentData: unknown) => {
+          // 1. Type guard for array
+          if (!Array.isArray(currentData)) {
+            return currentData; // Leave intact for revalidation
+          }
+
+          // 2. Type guard for User objects
+          return currentData.filter((item): item is Payment => {
+            const user = item as Payment;
+            return typeof user._id === "string" && user._id !== id;
+          });
+        },
+        false
+      );
+
+      // Send delete request
+      const response = await fetch(`${url}/delete-a-payment/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Deletion failed");
+      }
+
+      // Force revalidation to ensure consistency with server
+      mutate(`${url}/getAllPayment`);
+
+      return true;
+    } catch (error) {
+      console.error("Delete error:", error);
+
+      // Revert optimistic update on error
+      mutate(`${url}/getAllPayment`);
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete payment"
+      );
+      return false;
+    }
+  };
+
+  const deletePaymentRequest = async (id: string) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return false;
+    }
+
+    try {
+      // Optimistic update: remove user immediately from UI
+      mutate(
+        `${url}/get-allPayment-request`,
+        (currentData: unknown) => {
+          // 1. Type guard for array
+          if (!Array.isArray(currentData)) {
+            return currentData; // Leave intact for revalidation
+          }
+
+          // 2. Type guard for User objects
+          return currentData.filter((item): item is PaymentRequest => {
+            const user = item as PaymentRequest;
+            return typeof user._id === "string" && user._id !== id;
+          });
+        },
+        false
+      );
+
+      // Send delete request
+      const response = await fetch(`${url}/delete-payment-request/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Deletion failed");
+      }
+
+      // Force revalidation to ensure consistency with server
+      mutate(`${url}/get-allPayment-request`);
+
+      toast.success("Payment request deleted successfully");
+      return true;
+    } catch (error) {
+      console.error("Delete error:", error);
+
+      // Revert optimistic update on error
+      mutate(`${url}/get-allPayment-request`);
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete payment request"
+      );
+      return false;
+    }
+  }
 
   const createProduct = async (formData: FormData) => {
     const authToken = getAuthFromCookies()?.accessToken;
@@ -360,7 +479,7 @@ export const useUserActions = (): UserActions => {
     }
   };
 
-  const userCommisson = async (id: string) => {
+  const userCommisson = async (id: string,data: {amount: number}) => {
     const authToken = getAuthFromCookies()?.accessToken;
     if (!authToken) {
       toast.error("Authentication required");
@@ -512,7 +631,9 @@ export const useUserActions = (): UserActions => {
     updateUserPakageLink,
     userCommisson,
     paymentConfirmation,
-    giveEarningsEachUser
+    giveEarningsEachUser,
+    deletePaymentRequest,
+    deleteAPayment
   };
 };
 

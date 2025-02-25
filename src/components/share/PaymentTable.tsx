@@ -30,14 +30,12 @@ const PaymentTable = ({data,heading}: Props) => {
     >(null);
 
 
-    const {  updateUserStatus,activateAffiliate  } =
+    const {  updateUserStatus,activateAffiliate,deleteAPayment,userCommisson  } =
     useUserActions();
 
   const handleActivate = async (id: string) => {
     try {
-      console.log("id", id);
       const result = await activateAffiliate(id);
-      console.log("result", result);
       if (result === false) {
         toast.error("Failed to activate user");
         return;
@@ -48,6 +46,22 @@ const PaymentTable = ({data,heading}: Props) => {
       toast.error("Failed to activate user");
     }
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const result = await deleteAPayment(id);
+      if (result === false) {
+        toast.error("Failed to delete user");
+        return;
+      }
+      toast.success("User deleted successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to delete user");
+    }
+  };
+
+  // const handleuUserCommission
 
   const handleSubmit = async (e: React.FormEvent, id: string) => {
     e.preventDefault();
@@ -176,9 +190,9 @@ const PaymentTable = ({data,heading}: Props) => {
               <TableCell>
                 <Button size={"sm"} onClick={()=> handleActivate(invoice?.user)}>Activate</Button>
               </TableCell>
-            {/* <TableCell className="text-right">
-            <Button size={"sm"} onClick={()=> handleDelete(invoice?._id || "")}>Delete</Button>
-            </TableCell> */}
+            <TableCell className="text-right">
+            <Button size={"sm"} onClick={()=> handleDelete(invoice?._id)}>Delete</Button>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
