@@ -95,7 +95,7 @@ const GetAllUsers = () => {
         </div>
       ) : paymentError  ? ( <div>Error: something went worng to get payments</div> ) : (
         <TabsContent value="payments">
-          <PaymentTable data={usersPayment || []} heading={["Name", "Amount"]} />
+          <PaymentTable data={usersPayment || []} heading={["FromNumber", "ToNumber", "Amount","Status","PaymentDate","Action",]} />
         </TabsContent>
       )
         }
