@@ -53,7 +53,7 @@ const ProfileDetals = () => {
       <div className="w-full md:w-1/2 bg-gray-800 rounded-lg">
         <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800">
           <Image
-            className="object-cover object-center w-full h-56"
+            className="object-cover object-center w-full h-56 rounded-full"
             width={300}
             height={300}
             src={user?.photo || "/default-avatar.jpg"}
@@ -209,8 +209,8 @@ const ProfileDetals = () => {
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("ToNumber", { 
                     required: "Receiver number is required",
-                    validate: value => 
-                      value === 1795944731 || "Must be our payment number"
+                    // validate: value => 
+                    //   value === (01795944731) || "Must be our payment number"
                   })}
                 />
                 {errors.ToNumber && (

@@ -32,7 +32,7 @@ interface UserActions {
   updateUserStatus: (id: string, updatedData: Update) => Promise<boolean>;
   updateUserPakageLink: (updatedData: PackagelinkUpdate) => Promise<User | null>;
   coursePurchase: (purChasedData: Purchased) => Promise<boolean>;
-  activateAffiliate: (id : string) => Promise<boolean>;
+  activateAffiliate: (userId : string) => Promise<boolean | null>;
   getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
   userCommisson: (id: string) => Promise<number | null>;
@@ -332,7 +332,7 @@ export const useUserActions = (): UserActions => {
     }
   };
 
-  const activateAffiliate = async (id : string) => {
+  const activateAffiliate = async (userId : string) => {
     const authToken = getAuthFromCookies()?.accessToken;
     if (!authToken) {
       toast.error("Authentication required");
@@ -340,7 +340,7 @@ export const useUserActions = (): UserActions => {
     }
 
     try {
-      const response = await fetch(`${url}/activate-affiliate/${id}`, {
+      const response = await fetch(`${url}/activate-affiliate/${userId}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -354,7 +354,9 @@ export const useUserActions = (): UserActions => {
 
       return true;
     } catch (error) {
-      throw error; // Propagate error to component
+      console.error("Error:", error);
+      throw error;
+       // Propagate error to component
     }
   };
 

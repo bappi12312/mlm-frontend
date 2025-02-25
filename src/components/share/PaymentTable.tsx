@@ -30,8 +30,24 @@ const PaymentTable = ({data,heading}: Props) => {
     >(null);
 
 
-    const {  updateUserStatus,  } =
+    const {  updateUserStatus,activateAffiliate  } =
     useUserActions();
+
+  const handleActivate = async (id: string) => {
+    try {
+      console.log("id", id);
+      const result = await activateAffiliate(id);
+      console.log("result", result);
+      if (result === false) {
+        toast.error("Failed to activate user");
+        return;
+      }
+      toast.success("User activated successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to activate user");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent, id: string) => {
     e.preventDefault();
@@ -156,6 +172,9 @@ const PaymentTable = ({data,heading}: Props) => {
                     Update
                   </Button>
                 </form>
+              </TableCell>
+              <TableCell>
+                <Button size={"sm"} onClick={()=> handleActivate(invoice?.user)}>Activate</Button>
               </TableCell>
             {/* <TableCell className="text-right">
             <Button size={"sm"} onClick={()=> handleDelete(invoice?._id || "")}>Delete</Button>
