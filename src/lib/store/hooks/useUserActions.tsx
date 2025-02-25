@@ -36,6 +36,12 @@ interface UserActions {
   getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
   userCommisson: (id: string) => Promise<number | null>;
+  paymentConfirmation: (data: {userId: string, paymentId: string}) => Promise<User & Payment | null>;
+  giveEarningsEachUser: (data : {
+    userId : string,
+    affiliateAmount? : number,
+    amount? : number
+  }) => Promise<boolean | null>
 }
 
 export const useUserActions = (): UserActions => {
@@ -428,6 +434,67 @@ export const useUserActions = (): UserActions => {
     }
   };
 
+  const paymentConfirmation = async (data: {userId: string, paymentId: string}) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${url}/payment-confirmation`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to confirm payment");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  }
+
+  const giveEarningsEachUser = async (data : {
+    userId : string,
+    affiliateAmount? : number,
+    amount? : number
+  }) => {
+    const authToken = getAuthFromCookies()?.accessToken;
+    if (!authToken) {
+      toast.error("Authentication required");
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${url}/give-earnings-each-user`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to give earnings");
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error; // Propagate error to component
+    }
+  }
+
+
   return {
     deleteUser,
     createProduct,
@@ -441,7 +508,9 @@ export const useUserActions = (): UserActions => {
     getAllPayment,
     getAllPaymentRequest,
     updateUserPakageLink,
-    userCommisson
+    userCommisson,
+    paymentConfirmation,
+    giveEarningsEachUser
   };
 };
 
