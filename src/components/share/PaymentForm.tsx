@@ -1,41 +1,48 @@
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { CoursePakage } from "@/types/types"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { CoursePakage } from "@/types/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
-import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi"
-import { toast } from "sonner"
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi";
+import { toast } from "sonner";
 
 // Payment details schema
 const paymentSchema = z.object({
   fromNumber: z.string().min(11, "Must be a valid BD number"),
   toNumber: z.string().min(11, "Must be a valid BD number"),
-  amount: z.number().min(100, "Minimum amount is ৳100")
-})
+  amount: z.number().min(100, "Minimum amount is ৳100"),
+});
 
 // Affiliate code schema
 const affiliateSchema = z.object({
   affiliateCode: z.string().min(1, "Affiliate code is required"),
-})
+});
 
 type PaymentFormProps = {
-  product: CoursePakage
-  onFormSubmit: (data: { affiliateCode: string }) => void
-}
+  product: CoursePakage;
+  onFormSubmit: (data: { affiliateCode: string }) => void;
+};
 
 const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
-  const [currentStep, setCurrentStep] = React.useState(0)
-  const [paymentCreation, { isLoading }] = usePaymentCreationMutation()
+  const [currentStep, setCurrentStep] = React.useState(0);
+  const [paymentCreation, { isLoading }] = usePaymentCreationMutation();
 
   // Payment details form
   const paymentForm = useForm<z.infer<typeof paymentSchema>>({
@@ -43,9 +50,9 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
     defaultValues: {
       fromNumber: "",
       toNumber: "",
-      amount: product.price
-    }
-  })
+      amount: product.price,
+    },
+  });
 
   // Affiliate code form
   const affiliateForm = useForm<z.infer<typeof affiliateSchema>>({
@@ -53,28 +60,30 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
     defaultValues: {
       affiliateCode: "",
     },
-  })
+  });
 
   const handlePaymentSubmit = async (values: z.infer<typeof paymentSchema>) => {
     try {
       const result = await paymentCreation({
         FromNumber: Number(values.fromNumber),
         ToNumber: Number(values.toNumber),
-        Amount: values.amount
-      }).unwrap()
-      
-      toast.success(result?.message || "Payment verified successfully!")
-      setCurrentStep(2)
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Payment verification failed")
-    }
-  }
+        Amount: values.amount,
+      }).unwrap();
 
-  const handleAffiliateSubmit = async (values: z.infer<typeof affiliateSchema>) => {
+      toast.success(result?.message || "Payment verified successfully!");
+      setCurrentStep(2);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Payment verification failed");
+    }
+  };
+
+  const handleAffiliateSubmit = async (
+    values: z.infer<typeof affiliateSchema>
+  ) => {
     try {
       // Wait for parent submission to complete
       await onFormSubmit(values);
-      
+
       toast.success("Payment completed successfully!");
       setCurrentStep(0);
       affiliateForm.reset();
@@ -90,27 +99,28 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
       content: (
         <div className="space-y-4">
           <p className="text-gray-300">
-            Please complete your payment of ৳{product.price} to one of these numbers:
+            Please complete your payment of ৳{product.price} to one of these
+            numbers:
           </p>
           <div className="space-y-2 font-mono">
             <p>Bkash: 01795944731</p>
             <p>Nagad: 01795944731</p>
             <p>Rocket: 01795944731</p>
           </div>
-          <Button 
-            className="w-full mt-4"
-            onClick={() => setCurrentStep(1)}
-          >
+          <Button className="w-full mt-4" onClick={() => setCurrentStep(1)}>
             I've Made Payment - Next
           </Button>
         </div>
-      )
+      ),
     },
     {
       title: "Payment Verification",
       content: (
         <Form {...paymentForm}>
-          <form onSubmit={paymentForm.handleSubmit(handlePaymentSubmit)} className="space-y-6">
+          <form
+            onSubmit={paymentForm.handleSubmit(handlePaymentSubmit)}
+            className="space-y-6"
+          >
             <FormField
               control={paymentForm.control}
               name="fromNumber"
@@ -128,7 +138,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={paymentForm.control}
               name="toNumber"
@@ -146,7 +156,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={paymentForm.control}
               name="amount"
@@ -159,14 +169,14 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                       placeholder={`৳${product.price}`}
                       className="text-gray-400"
                       {...field}
-                      onChange={e => field.onChange(Number(e.target.value))}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -176,58 +186,75 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
               >
                 Back
               </Button>
-              <Button 
-                className="w-full"
-                type="submit"
-                disabled={isLoading}
-              >
+              <Button className="w-full" type="submit" disabled={isLoading}>
                 {isLoading ? "Verifying..." : "Verify Payment"}
               </Button>
             </div>
           </form>
         </Form>
-      )
+      ),
     },
     {
       title: "Affiliate Code",
       content: (
         <Form {...affiliateForm}>
-          <form onSubmit={affiliateForm.handleSubmit(handleAffiliateSubmit)} className="space-y-6">
+          <form
+            onSubmit={affiliateForm.handleSubmit(handleAffiliateSubmit)}
+            className="space-y-6"
+          >
             <FormField
               control={affiliateForm.control}
               name="affiliateCode"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Affiliate Code</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter affiliate code"
-                      className="text-gray-400"
-                      {...field}
-                      // Add this to ensure input updates
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                <FormField
+                  control={affiliateForm.control}
+                  name="affiliateCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Affiliate Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter affiliate code"
+                          className="text-gray-400"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
             />
-            {/* ... rest of the form ... */}
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setCurrentStep(0)}
+                type="button"
+              >
+                Back
+              </Button>
+              <Button className="w-full" type="submit" disabled={isLoading}>
+                {isLoading ? "Verifying..." : "complete Payment"}
+              </Button>
+            </div>
           </form>
         </Form>
-      )
-    }
-  ]
+      ),
+    },
+  ];
 
   return (
-    <Dialog  onOpenChange={() => {
-      if (!open) {
-        setCurrentStep(0);
-        paymentForm.reset();
-        affiliateForm.reset();
-      }
-    }}>
+    <Dialog
+      onOpenChange={() => {
+        if (!open) {
+          setCurrentStep(0);
+          paymentForm.reset();
+          affiliateForm.reset();
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="flex-1" variant={"destructive"}>
           Pay now
@@ -237,16 +264,14 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
         <DialogHeader>
           <DialogTitle>{steps[currentStep].title}</DialogTitle>
           {currentStep === 0 && (
-            <p className="text-sm text-gray-400">
-              Purchasing: {product.name}
-            </p>
+            <p className="text-sm text-gray-400">Purchasing: {product.name}</p>
           )}
         </DialogHeader>
-        
+
         {steps[currentStep].content}
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default PaymentForm
+export default PaymentForm;
