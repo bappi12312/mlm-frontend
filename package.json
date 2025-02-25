@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.1",
+    "@next/font": "^14.2.15",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-collapsible": "^1.1.2",
@@ -29,6 +30,7 @@
     "cookies-next": "^5.1.0",
     "embla-carousel-react": "^8.5.2",
     "framer-motion": "^11.17.0",
+    "google": "^2.1.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",

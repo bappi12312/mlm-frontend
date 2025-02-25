@@ -4,11 +4,14 @@ import "./globals.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import DynamicProvider from "./ClientComponents";
+import { Noto_Sans_Bengali } from "next/font/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+const notoSansBengali = Noto_Sans_Bengali({ subsets: ["bengali"] });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -28,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansBengali.className} antialiased`}
         suppressHydrationWarning
       >
           <DynamicProvider>

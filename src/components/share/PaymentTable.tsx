@@ -8,30 +8,48 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useUserActions } from "@/lib/store/hooks/useUserActions";
 import { Switch } from "../ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   data: Payment[];
   heading: string[];
-}
+};
 
 type FieldType = "isPayForCourse" | "isPay" | "isAffiliate" | "status";
 
-const PaymentTable = ({data,heading}: Props) => {
+const PaymentTable = ({ data, heading }: Props) => {
   const [selectedField, setSelectedField] = useState<FieldType | "">("");
-    const [fieldValue, setFieldValue] = useState<
-      boolean | "Active" | "Inactive" | null
-    >(null);
+  const [fieldValue, setFieldValue] = useState<
+    boolean | "Active" | "Inactive" | null
+  >(null);
 
-
-    const {  updateUserStatus,activateAffiliate,deleteAPayment,userCommisson  } =
+  const { updateUserStatus, activateAffiliate, deleteAPayment, userCommisson } =
     useUserActions();
+
+  const handleUserCommison = async (id: string) => {
+    try {
+      // Wait for parent submission to complete
+      await userCommisson(id);
+
+      toast.success("Payment distribution successfully!");
+    } catch (error) {
+      // Handle errors from parent submission
+      console.error("Error:", error);
+      toast.error("Failed to distribute payment");
+    }
+  };
 
   const handleActivate = async (id: string) => {
     try {
@@ -127,29 +145,36 @@ const PaymentTable = ({data,heading}: Props) => {
 
   return (
     <>
-     <div className="flex justify-center h-full">
-      <h1 className="text-2xl md:text-3xl font-bold text-main">Active Courses</h1>
-    </div>
-    <Table>
-      <TableCaption>A list of your recent course.</TableCaption>
-      <TableHeader>
-        <TableRow>
-         {
-          heading && heading?.map((head) => (
-            <TableHead key={head} className="w-[100px]">{head}</TableHead>
-          ))
-         }
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data?.map((invoice) => (
-          <TableRow key={invoice._id}>
-            <TableCell className="font-medium">{invoice.FromNumber}</TableCell>
-            <TableCell>{invoice.ToNumber}</TableCell>
-            <TableCell>{invoice?.Amount}</TableCell>
-            <TableCell >{invoice?.status || "Pending"}</TableCell>
-            <TableCell >{ new Date(invoice?.PaymentDate).toLocaleDateString()}</TableCell>
-            <TableCell className="text-right">
+      <div className="flex justify-center h-full">
+        <h1 className="text-2xl md:text-3xl font-bold text-main">
+          Active Courses
+        </h1>
+      </div>
+      <Table>
+        <TableCaption>A list of your recent course.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {heading &&
+              heading?.map((head) => (
+                <TableHead key={head} className="w-[100px]">
+                  {head}
+                </TableHead>
+              ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data?.map((invoice) => (
+            <TableRow key={invoice._id}>
+              <TableCell className="font-medium">
+                {invoice.FromNumber}
+              </TableCell>
+              <TableCell>{invoice.ToNumber}</TableCell>
+              <TableCell>{invoice?.Amount}</TableCell>
+              <TableCell>{invoice?.status || "Pending"}</TableCell>
+              <TableCell>
+                {new Date(invoice?.PaymentDate).toLocaleDateString()}
+              </TableCell>
+              <TableCell className="text-right">
                 <form
                   onSubmit={(e) => handleSubmit(e, invoice.user)}
                   className="w-full flex items-center justify-center gap-3"
@@ -188,23 +213,39 @@ const PaymentTable = ({data,heading}: Props) => {
                 </form>
               </TableCell>
               <TableCell>
-                <Button size={"sm"} onClick={()=> handleActivate(invoice?.user)}>Activate</Button>
+                <Button
+                  size={"sm"}
+                  onClick={() => handleActivate(invoice?.user)}
+                >
+                  Activate
+                </Button>
               </TableCell>
-            <TableCell className="text-right">
-            <Button size={"sm"} onClick={()=> handleDelete(invoice?._id)}>Delete</Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      <TableFooter>
-        {/* <TableRow>
+              <TableCell>
+                <Button
+                  size={"sm"}
+                  onClick={() => handleUserCommison(invoice?.user)}
+                  
+                >
+                  Commission
+                </Button>
+              </TableCell>
+              <TableCell className="text-right">
+                <Button size={"sm"} onClick={() => handleDelete(invoice?._id)}>
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        <TableFooter>
+          {/* <TableRow>
           <TableCell colSpan={3}>Total</TableCell>
           <TableCell className="text-right">{data?.reduce((total, invoice) => total + Number(invoice.earnings) || 0, 0)}</TableCell>
         </TableRow> */}
-      </TableFooter>
-    </Table>
+        </TableFooter>
+      </Table>
     </>
-  )
-}
+  );
+};
 
-export default PaymentTable
+export default PaymentTable;

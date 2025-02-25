@@ -35,9 +35,7 @@ interface UserActions {
   activateAffiliate: (userId : string) => Promise<boolean | null>;
   getAllPayment: () => Promise<Payment[] | null>; 
   getAllPaymentRequest: () => Promise<PaymentRequest[] | null>;
-  userCommisson: (id: string,data:{
-    amount: number
-  }) => Promise<number | null>;
+  userCommisson: (id: string) => Promise<boolean | null>;
   paymentConfirmation: (data: {userId: string, paymentId: string}) => Promise<User & Payment | null>;
   giveEarningsEachUser: (data : {
     userId : string,
@@ -479,7 +477,7 @@ export const useUserActions = (): UserActions => {
     }
   };
 
-  const userCommisson = async (id: string,data: {amount: number}) => {
+  const userCommisson = async (id: string) => {
     const authToken = getAuthFromCookies()?.accessToken;
     if (!authToken) {
       toast.error("Authentication required");
@@ -487,18 +485,20 @@ export const useUserActions = (): UserActions => {
     }
 
     try {
-      const response = await fetch(`${url}/get-user-commission/${id}`, {
+      const response = await fetch(`${url}/distribute-commision/${id}`, {
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
+      console.log("response", response);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch user commission");
+        throw new Error(errorData.message || "Failed to distribute commision");
       }
 
-      return await response.json();
+      return true;
     } catch (error) {
       throw error; // Propagate error to component
     }
