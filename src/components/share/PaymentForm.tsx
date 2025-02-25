@@ -72,8 +72,8 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
 
       toast.success(result?.message || "Payment verified successfully!");
       setCurrentStep(2);
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Payment verification failed");
+    } catch (error: unknown) {
+      toast.error("Payment verification failed");
     }
   };
 
@@ -108,7 +108,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
             <p>Rocket: 01795944731</p>
           </div>
           <Button className="w-full mt-4" onClick={() => setCurrentStep(1)}>
-            I've Made Payment - Next
+            I Have Made Payment - Next
           </Button>
         </div>
       ),
@@ -144,7 +144,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
               name="toNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Receiver's Number</FormLabel>
+                  <FormLabel>Receiver Mobiles Number</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="01795944731"
