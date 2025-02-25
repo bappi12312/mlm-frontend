@@ -205,7 +205,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
             <FormField
               control={affiliateForm.control}
               name="affiliateCode"
-              render={({ field }) => (
+              render={({  }) => (
                 <FormField
                   control={affiliateForm.control}
                   name="affiliateCode"
