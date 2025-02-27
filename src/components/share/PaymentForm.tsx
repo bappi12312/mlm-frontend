@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi";
 import { toast } from "sonner";
+import PaymentSuccesfulModal from "./modal/PaymentSuccesfulModal";
 
 // Payment details schema
 const paymentSchema = z.object({
@@ -43,6 +44,18 @@ type PaymentFormProps = {
 
 const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
   const [currentStep, setCurrentStep] = React.useState(0);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false);
+  const [paymentDetails, setPaymentDetails] = React.useState<{
+    FromNumber: string;
+    ToNumber: string;
+    Amount: number;
+    transactionId: string;
+  }>({
+    FromNumber: "",
+    ToNumber: "",
+    Amount: 0,
+    transactionId: "",
+  });
   const [paymentCreation, { isLoading }] = usePaymentCreationMutation();
 
   // Payment details form
@@ -67,11 +80,18 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
   const handlePaymentSubmit = async (values: z.infer<typeof paymentSchema>) => {
     try {
       const result = await paymentCreation({
-        FromNumber: Number(values.fromNumber),
-        ToNumber: Number(values.toNumber),
-        Amount: values.amount,
+        FromNumber: values.fromNumber,
+        ToNumber: values.toNumber,
+        Amount: Number(values.amount),
         transactionId: values.transactionId,
       }).unwrap();
+
+      setPaymentDetails({
+        FromNumber: values.fromNumber,
+        ToNumber: values.toNumber,
+        Amount: values.amount,
+        transactionId: values.transactionId,
+      });
 
       toast.success(result?.message || "Payment verified successfully!");
       setCurrentStep(2);
@@ -88,6 +108,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
       await onFormSubmit(values);
 
       toast.success("Payment completed successfully!");
+      setIsSuccessModalOpen(true);
       setCurrentStep(0);
       affiliateForm.reset();
       paymentForm.reset();
@@ -268,6 +289,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
   ];
 
   return (
+    <>
     <Dialog
       onOpenChange={() => {
         if (!open) {
@@ -293,6 +315,13 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
         {steps[currentStep].content}
       </DialogContent>
     </Dialog>
+
+    <PaymentSuccesfulModal
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+        paymentDetails={paymentDetails}
+      />
+    </>
   );
 };
 

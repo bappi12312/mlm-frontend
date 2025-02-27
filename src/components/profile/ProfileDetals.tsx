@@ -17,8 +17,8 @@ import { Button } from "@/components/ui/button";
 import PaymentSuccesfulModal from '../share/modal/PaymentSuccesfulModal';
 
 export type Inputs = {
-  FromNumber: number;
-  ToNumber?: number;
+  FromNumber: string;
+  ToNumber?: string;
   Amount: number;
   transactionId: string;
 };
@@ -191,7 +191,7 @@ const ProfileDetals = () => {
             <div className="space-y-4">
               <div>
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Your Mobile Number"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("FromNumber", { 
@@ -226,7 +226,7 @@ const ProfileDetals = () => {
 
               <div>
                 <input
-                  type="number"
+                  type="text"
                   placeholder="Receiver's Number (01795944731)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("ToNumber", { 

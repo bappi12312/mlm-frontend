@@ -18,8 +18,8 @@ const ProductsCard = ({ product }: { product: CoursePakage }) => {
   const handleFormSubmit = async (data: { affiliateCode: string }) => {
     try {
       const givenData = {
-        affiliateCode: data.affiliateCode,
-        courseId: product._id || "",
+        affiliateCode: data?.affiliateCode,
+        courseId: product?._id || "",
       };
 
       const res = await coursePurchase(givenData);

@@ -226,7 +226,7 @@ export const authApi = createApi({
     }),
     paymentCreation: builder.mutation<
       { message: string },
-      { FromNumber: number; ToNumber?: number; Amount: number, transactionId: string }
+      { FromNumber: string; ToNumber?: string; Amount: number, transactionId: string }
     >({
       query: (credentials) => ({
         url: "payment-creation",

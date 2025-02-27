@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import PaymentSuccesfulModal from "@/components/share/modal/PaymentSuccesfulModal";
 
 
 const ProductPage = () => {
@@ -27,6 +28,8 @@ const ProductPage = () => {
 
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<Inputs | null>(null);
 
   const {
       register,
@@ -42,6 +45,9 @@ const ProductPage = () => {
         const result = await paymentCreation(data).unwrap();
         toast.success(result?.message || "Submission successful!");
         setIsSecondModalOpen(false);
+        setPaymentDetails(data);
+        setIsSecondModalOpen(false);
+        setIsSuccessModalOpen(true); // Add this line
         reset();
       } catch (error: unknown) {
         console.error("Submission failed", error);
@@ -230,6 +236,13 @@ const ProductPage = () => {
         ))
       }
       </div>
+
+        {/* Payment Success Modal */}
+        <PaymentSuccesfulModal
+        paymentDetails={paymentDetails}
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+      />
     </div>
   )
 }
