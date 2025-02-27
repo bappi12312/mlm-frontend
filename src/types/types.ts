@@ -56,9 +56,10 @@ export interface Payment {
   Amount: number;
   FromNumber: string;
   PaymentDate: string;
-  ToNumber: string;
+  ToNumber?: string;
   user: string;
   status?: string;
+  transactionId: string
 }
 
 export interface PaymentRequest {

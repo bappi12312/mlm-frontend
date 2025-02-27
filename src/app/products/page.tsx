@@ -142,13 +142,29 @@ const ProductPage = () => {
 
               <div>
                 <input
+                  type="text"
+                  placeholder="Transaction ID"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("transactionId", { 
+                    required: "Transaction ID is required",
+                  })}
+                />
+                {errors?.transactionId && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors?.transactionId?.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <input
                   type="number"
                   placeholder="Receiver's Number (01795944731)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("ToNumber", { 
                     required: "Receiver number is required",
-                    validate: value => 
-                      value === 1795944731 || "Must be our payment number"
+                    // validate: value => 
+                    //   value === 1795944731 || "Must be our payment number"
                   })}
                 />
                 {errors.ToNumber && (

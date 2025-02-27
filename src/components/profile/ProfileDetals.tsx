@@ -14,17 +14,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import PaymentSuccesfulModal from '../share/modal/PaymentSuccesfulModal';
 
 export type Inputs = {
   FromNumber: number;
-  ToNumber: number;
+  ToNumber?: number;
   Amount: number;
+  transactionId: string;
 };
 
 const ProfileDetals = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<Inputs | null>(null);
 
   const {
     register,
@@ -37,9 +41,12 @@ const ProfileDetals = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
+      console.log(data)
       const result = await paymentCreation(data).unwrap();
       toast.success(result?.message || "Submission successful!");
+      setPaymentDetails(data);
       setIsSecondModalOpen(false);
+      setIsSuccessModalOpen(true);
       reset();
     } catch (error: unknown) {
       console.error("Submission failed", error);
@@ -201,6 +208,21 @@ const ProfileDetals = () => {
                   </span>
                 )}
               </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Transaction ID"
+                  className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
+                  {...register("transactionId", { 
+                    required: "Transaction ID is required",
+                  })}
+                />
+                {errors?.transactionId && (
+                  <span className="text-red-400 text-sm mt-1">
+                    {errors?.transactionId?.message}
+                  </span>
+                )}
+              </div>
 
               <div>
                 <input
@@ -265,6 +287,13 @@ const ProfileDetals = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+        {/* Payment Success Modal */}
+        <PaymentSuccesfulModal
+        paymentDetails={paymentDetails}
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+      />
 
       {/* Payment Components for Active Users */}
       {user?.status === "Active" && (

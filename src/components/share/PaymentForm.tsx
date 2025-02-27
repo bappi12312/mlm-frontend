@@ -28,6 +28,7 @@ const paymentSchema = z.object({
   fromNumber: z.string().min(11, "Must be a valid BD number"),
   toNumber: z.string().min(11, "Must be a valid BD number"),
   amount: z.number().min(100, "Minimum amount is ৳100"),
+  transactionId: z.string().min(1, "Transaction ID is required"),
 });
 
 // Affiliate code schema
@@ -50,6 +51,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
     defaultValues: {
       fromNumber: "",
       toNumber: "",
+      transactionId: "",
       amount: product.price,
     },
   });
@@ -68,6 +70,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
         FromNumber: Number(values.fromNumber),
         ToNumber: Number(values.toNumber),
         Amount: values.amount,
+        transactionId: values.transactionId,
       }).unwrap();
 
       toast.success(result?.message || "Payment verified successfully!");
@@ -150,6 +153,25 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                       placeholder="01795944731"
                       className="text-gray-400"
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+<FormField
+              control={paymentForm.control}
+              name="transactionId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transaction ID</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Transaction ID"
+                      className="text-gray-400"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
