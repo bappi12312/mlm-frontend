@@ -24,18 +24,17 @@ const PaymentRequested = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (data.number !== data.confirmNumber) {
-      toast.error("Confirmation number doesn't match");
+      toast.error("নিশ্চিতকরণ নাম্বার মিলে নি");
       return;
     }
-
     try {
       const result = await requestPayment(data).unwrap();
-      toast.success(result?.message || "Payment request submitted successfully!");
+      toast.success(result?.message || "পেমেন্ট অনুরোধ সফলভ হয়েছে!");
       setIsModalOpen(false);
       reset();
     } catch (error: unknown) {
-      console.error("Payment request failed", error);
-      toast.error("Payment request failed");
+      console.error("পেমেন্ট অনুরোধ ব্যর্থ হয়েছে", error);
+      toast.error("পেমেন্ট অনুরোধ ব্যর্থ হয়েছে");
     }
   };
 
@@ -44,14 +43,13 @@ const PaymentRequested = () => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogTrigger asChild>
           <Button className="w-full bg-blue-600 hover:bg-blue-700">
-            Request Payment Withdrawal
+            পেমেন্ট উইথড্রাউ অনুরোধ করুন
           </Button>
         </DialogTrigger>
-
         <DialogContent className="bg-gray-800 text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center mb-4">
-              Payment Withdrawal Request
+              পেমেন্ট উইথড্রাউ অনুরোধ
             </DialogTitle>
           </DialogHeader>
           
@@ -60,13 +58,13 @@ const PaymentRequested = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Payment Type (e.g., Bkash, Nagad)"
+                  placeholder="পেমেন্ট ধরণ (যেমন: Bkash, Nagad)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("type", { 
-                    required: "Payment type is required",
+                    required: "পেমেন্ট ধরণ প্রয়োজনীয়",
                     validate: value => 
                       ["bkash", "nagad", "rocket"].includes(value.toLowerCase()) || 
-                      "Supported types: Bkash, Nagad, Rocket"
+                      "সমর্থিত ধরণ: Bkash, Nagad, Rocket"
                   })}
                 />
                 {errors.type && (
@@ -75,17 +73,16 @@ const PaymentRequested = () => {
                   </span>
                 )}
               </div>
-
               <div>
                 <input
                   type="number"
-                  placeholder="Your Mobile Number"
+                  placeholder="আপনার মোবাইল নাম্বার"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("number", { 
-                    required: "Number is required",
+                    required: "নাম্বার প্রয়োজনীয়",
                     minLength: {
                       value: 11,
-                      message: "Must be a valid BD number"
+                      message: "একটি ব্যবস্থাপনামূল্য BD নাম্বার হতে হবে"
                     }
                   })}
                 />
@@ -95,14 +92,13 @@ const PaymentRequested = () => {
                   </span>
                 )}
               </div>
-
               <div>
                 <input
                   type="number"
-                  placeholder="Confirm Mobile Number"
+                  placeholder="নিশ্চিতকরণ মোবাইল নাম্বার"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("confirmNumber", { 
-                    required: "Confirmation is required",
+                    required: "নিশ্চিতকরণ প্রয়োজনীয়",
                   })}
                 />
                 {errors.confirmNumber && (
@@ -112,7 +108,6 @@ const PaymentRequested = () => {
                 )}
               </div>
             </div>
-
             <div className="flex flex-col gap-3">
               <Button 
                 type="submit" 
@@ -120,9 +115,9 @@ const PaymentRequested = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="animate-pulse">Processing...</span>
+                  <span className="animate-pulse">প্রক্রিয়া করা হচ্ছে...</span>
                 ) : (
-                  "Submit Request"
+                  "অনুরোধ জমা দিন"
                 )}
               </Button>
               <Button
@@ -131,7 +126,7 @@ const PaymentRequested = () => {
                 onClick={() => setIsModalOpen(false)}
                 className="w-full text-gray-300 hover:bg-gray-700"
               >
-                Cancel
+                বাতিল করুন
               </Button>
             </div>
           </form>
