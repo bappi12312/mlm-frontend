@@ -56,16 +56,16 @@ const Login = () => {
   const handleAuthSubmit = async (type: AuthTab) => {
     try {
       if (type === "signup") {
-        const { name, email, password,referredBy } = signupInput;
-        if (!name || !email || !password || !referredBy) return toast.error("All fields are required for signup.");
+        const { name, email, password, referredBy } = signupInput;
+        if (!name || !email || !password || !referredBy) return toast.error("নিবন্ধনের জন্য সকল ফিল্ড পূরণ করুন।");
         await registerUser(signupInput).unwrap();
       } else {
         const { email, password } = loginInput;
-        if (!email || !password) return toast.error("Email and password are required for login.");
+        if (!email || !password) return toast.error("লগইনের জন্য ইমেইল ও পাসওয়ার্ড প্রয়োজন");
         await loginUser(loginInput).unwrap();
       }
     } catch (error) {
-      const errorMessage = (error as APIError)?.message || `Failed to ${type}`;
+      const errorMessage = (error as APIError)?.message || (type === "signup" ? "নিবন্ধন করতে ব্যর্থ হয়েছে" : "লগইন করতে ব্যর্থ হয়েছে");
       toast.error(errorMessage);
     }
   };
@@ -73,13 +73,13 @@ const Login = () => {
   useEffect(() => {
     if (registerIsSuccess && registerData) {
       setLoginInput({ email: signupInput.email, password: signupInput.password });
-      toast.success(registerData.message || "Signup successful. Please log in.");
+      toast.success(registerData.message || "নিবন্ধন সফল! অনুগ্রহ করে লগইন করুন");
     }
   }, [registerIsSuccess, signupInput, registerData]);
 
   useEffect(() => {
     if (loginIsSuccess && loginData) {
-      toast.success(loginData.message || "Login successful.");
+      toast.success(loginData.message || "সফলভাবে লগইন হয়েছে");
       router.push("/dashboard");
     }
   }, [loginIsSuccess, router, loginData]);
@@ -88,7 +88,7 @@ const Login = () => {
     const error = registerError || loginError;
     if (error && "data" in error) {
       const errorData = error.data as APIError;
-      toast.error(errorData?.message || "An error occurred");
+      toast.error(errorData?.message || "একটি সমস্যা হয়েছে");
     }
   }, [registerError, loginError]);
 
@@ -96,49 +96,72 @@ const Login = () => {
     <div className="flex items-center w-full justify-center mt-20">
       <Tabs value={tab} onValueChange={(value) => setTab(value as AuthTab)} className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="signup">Signup</TabsTrigger>
-          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="signup">নিবন্ধন</TabsTrigger>
+          <TabsTrigger value="login">লগইন</TabsTrigger>
         </TabsList>
 
         <TabsContent value="signup">
           <Card>
             <CardHeader>
-              <CardTitle>Signup</CardTitle>
-              <CardDescription>Create a new account and click signup when youre done</CardDescription>
+              <CardTitle>নিবন্ধন</CardTitle>
+              <CardDescription>
+                একটি নতুন অ্যাকাউন্ট তৈরি করুন এবং সম্পন্ন হলে নিবন্ধন ক্লিক করুন
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(signupInput).map(([key, value]) => (
                 <div key={key} className="space-y-1">
-                  <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
-                  <Input type={key === "password" ? "password" : "text"} name={key} value={value} onChange={(e) => handleInputChange(e, "signup")} required={key !== "referredBy"} />
+                  <Label htmlFor={key}>
+                    {{
+                      name: "নাম",
+                      email: "ইমেইল",
+                      password: "পাসওয়ার্ড",
+                      referredBy: "রেফার কোড"
+                    }[key]}
+                  </Label>
+                  <Input
+                    type={key === "password" ? "password" : "text"}
+                    name={key}
+                    value={value}
+                    onChange={(e) => handleInputChange(e, "signup")}
+                    required={key !== "referredBy"}
+                    placeholder={key === "referredBy" ? "ঐচ্ছিক" : ""}
+                  />
                 </div>
               ))}
             </CardContent>
             <CardFooter>
               <Button disabled={registerIsLoading} onClick={() => handleAuthSubmit("signup")}>
-                {registerIsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Signup"}
+                {registerIsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "নিবন্ধন করুন"}
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
 
-          {/* ✅ Login Tab */}
-          <TabsContent value="login">
+        <TabsContent value="login">
           <Card>
             <CardHeader>
-              <CardTitle>Login</CardTitle>
-              <CardDescription>Enter your credentials to access your account</CardDescription>
+              <CardTitle>লগইন</CardTitle>
+              <CardDescription>আপনার অ্যাকাউন্টে প্রবেশ করতে ক্রেডেনশিয়াল লিখুন</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {Object.entries(loginInput).map(([key, value]) => (
                 <div key={key} className="space-y-1">
-                  <Label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</Label>
+                  <Label htmlFor={key}>
+                    {{
+                      email: "ইমেইল",
+                      password: "পাসওয়ার্ড"
+                    }[key]}
+                  </Label>
                   <Input
                     type={key === "password" ? "password" : "email"}
                     name={key}
                     value={value}
                     onChange={(e) => handleInputChange(e, "login")}
-                    placeholder={key === "email" ? "example@email.com" : "password"}
+                    placeholder={{
+                      email: "উদাহরণ: example@email.com",
+                      password: "পাসওয়ার্ড"
+                    }[key]}
                     required
                   />
                 </div>
@@ -146,7 +169,7 @@ const Login = () => {
             </CardContent>
             <CardFooter>
               <Button disabled={loginIsLoading} onClick={() => handleAuthSubmit("login")}>
-                {loginIsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Login"}
+                {loginIsLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "লগইন করুন"}
               </Button>
             </CardFooter>
           </Card>

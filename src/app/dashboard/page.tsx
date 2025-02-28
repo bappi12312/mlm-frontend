@@ -22,12 +22,12 @@ const AdminPage = () => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState<TabID>("profile");
 
-  // Compute tabs only when authentication status is available
+  // ট্যাব কনফিগারেশন
   const tabs: Tab[] = [
-    { id: "profile", label: "Profile", icon: UserCheck, showWhen: isAuthenticated },
-    { id: "manage-users", label: "Manage Users", icon: UserRoundPen, showWhen: user?.role === "admin" },
-    { id: "manage-products", label: "Manage Products", icon: UserRoundPen, showWhen: user?.role === "admin" },
-    { id: "affiliatesSales", label: "Sales", icon: BarChart, showWhen: isAuthenticated && user?.isAffiliate },
+    { id: "profile", label: "প্রোফাইল", icon: UserCheck, showWhen: isAuthenticated },
+    { id: "manage-users", label: "ব্যবহারকারী ব্যবস্থাপনা", icon: UserRoundPen, showWhen: user?.role === "admin" },
+    { id: "manage-products", label: "পণ্য ব্যবস্থাপনা", icon: UserRoundPen, showWhen: user?.role === "admin" },
+    { id: "affiliatesSales", label: "বিক্রয়", icon: BarChart, showWhen: isAuthenticated && user?.isAffiliate },
   ].filter((tab) => tab.showWhen) as Tab[];
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const AdminPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          {user?.role === "admin" ? "Admin" : "User"} Dashboard
+          {user?.role === "admin" ? "অ্যাডমিন ড্যাশবোর্ড" : "ব্যবহারকারী ড্যাশবোর্ড"}
         </motion.h1>
 
         {tabs.length > 0 && (
