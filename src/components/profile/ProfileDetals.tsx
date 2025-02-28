@@ -43,20 +43,20 @@ const ProfileDetals = () => {
     try {
       console.log(data)
       const result = await paymentCreation(data).unwrap();
-      toast.success(result?.message || "Submission successful!");
+      toast.success(result?.message || "সফলভাবে জমা দেওয়া হয়েছে!");
       setPaymentDetails(data);
       setIsSecondModalOpen(false);
       setIsSuccessModalOpen(true);
       reset();
     } catch (error: unknown) {
-      console.error("Submission failed", error);
-      toast.error( "Submission failed. Please try again.");
+      console.error("জমা দিতে ব্যর্থ হয়েছে", error);
+      toast.error("জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
     }
   };
 
   return (
     <div className="w-full h-full flex justify-center items-center flex-col gap-8">
-      {/* Profile Card */}
+      {/* প্রোফাইল কার্ড */}
       <div className="w-full md:w-1/2 bg-gray-800 rounded-lg">
         <div className="w-full overflow-hidden rounded-lg shadow-lg bg-gray-800">
           <Image
@@ -64,12 +64,12 @@ const ProfileDetals = () => {
             width={300}
             height={300}
             src={user?.photo || "/default-avatar.jpg"}
-            alt="avatar"
+            alt="প্রোফাইল ছবি"
           />
 
           <div className="flex items-center px-6 py-3 bg-gray-900">
             <h1 className="mx-3 text-lg font-semibold text-white capitalize">
-              Welcome to the TTO platform
+              TTO প্ল্যাটফর্মে স্বাগতম
             </h1>
           </div>
 
@@ -80,19 +80,19 @@ const ProfileDetals = () => {
 
             <p className="py-2 text-gray-400">
               {user?.status === "Active" 
-                ? "Your account is fully activated!"
-                : "Activate your account to enable referral features"}
+                ? "আপনার অ্যাকাউন্ট সম্পূর্ণ সক্রিয় হয়েছে!"
+                : "রেফারেল সুবিধা সক্রিয় করতে আপনার অ্যাকাউন্ট অ্যাক্টিভেট করুন"}
             </p>
 
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">Status: {user?.status}</h1>
+              <h1 className="px-2 text-sm">স্ট্যাটাস: {user?.status}</h1>
               <span className={user?.status === "Active" ? "text-green-500" : "text-red-500"}>
                 {user?.status === "Active" ? "🟢" : "🔴"}
               </span>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
-              <h1 className="px-2 text-sm">Earnings: ৳{user?.earnings?.toFixed(2)}</h1>
+              <h1 className="px-2 text-sm">আয়: ৳{user?.earnings?.toFixed(2)}</h1>
             </div>
 
             <div className="flex items-center mt-4 text-gray-200">
@@ -101,7 +101,7 @@ const ProfileDetals = () => {
 
             <div className="flex items-center mt-4 text-gray-200">
               <h1 className="px-2 text-sm">
-                Referral code: {" "}
+                রেফারেল কোড: {" "}
                 <span className="text-emerald-400 font-mono">
                   {user?.referalCode}
                 </span>
@@ -118,38 +118,38 @@ const ProfileDetals = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Package Link: {link.link}
+                    প্যাকেজ লিঙ্ক: {link.link}
                   </Link>
                 ))}
               </div>
             )}
 
-            {/* Activate Account Button */}
+            {/* অ্যাকাউন্ট সক্রিয় বাটন */}
             {user?.status !== "Active" && (
               <div className="mt-6">
                 <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
                   <DialogTrigger asChild>
                     <Button className="w-full bg-green-600 hover:bg-green-700 text-lg">
-                      Activate Account
+                      অ্যাকাউন্ট সক্রিয় করুন
                     </Button>
                   </DialogTrigger>
                   
-                  {/* First Modal - Payment Instructions */}
+                  {/* প্রথম মোডাল - পেমেন্ট নির্দেশনা */}
                   <DialogContent className="bg-gray-800 text-white max-w-md">
                     <DialogHeader>
                       <DialogTitle className="text-2xl text-center mb-4">
-                        Activation Instructions
+                        অ্যাক্টিভেশন নির্দেশনা
                       </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6">
                       <div className="text-center">
                         <p className="text-gray-300 mb-4">
-                          Please send ৳100 to one of these numbers:
+                          অনুগ্রহ করে ৳১০০ নিচের যেকোনো একটি নম্বরে পাঠান:
                         </p>
                         <div className="space-y-3 font-mono">
-                          <p>Bkash: 01795944731</p>
-                          <p>Nagad: 01795944731</p>
-                          <p>Rocket: 01795944731</p>
+                          <p>বিকাশ: 01795944731</p>
+                          <p>নগদ: 01795944731</p>
+                          <p>রকেট: 01795944731</p>
                         </div>
                       </div>
                       <div className="flex flex-col gap-3">
@@ -160,14 +160,14 @@ const ProfileDetals = () => {
                           }}
                           className="w-full bg-green-600 hover:bg-green-700"
                         >
-                        I&apos;ve Sent Payment - Next
+                          আমি পেমেন্ট পাঠিয়েছি - পরবর্তী
                         </Button>
                         <Button
                           variant="outline"
                           onClick={() => setIsFirstModalOpen(false)}
                           className="w-full text-gray-300 hover:bg-gray-700"
                         >
-                          Cancel
+                          বাতিল করুন
                         </Button>
                       </div>
                     </div>
@@ -179,12 +179,12 @@ const ProfileDetals = () => {
         </div>
       </div>
 
-      {/* Payment Form Modal */}
+      {/* পেমেন্ট ফর্ম মোডাল */}
       <Dialog open={isSecondModalOpen} onOpenChange={setIsSecondModalOpen}>
         <DialogContent className="bg-gray-800 text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center mb-4">
-              Payment Details
+              পেমেন্ট বিবরণ
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -192,13 +192,13 @@ const ProfileDetals = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Your Mobile Number"
+                  placeholder="আপনার মোবাইল নম্বর"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("FromNumber", { 
-                    required: "Your number is required",
+                    required: "আপনার নম্বর প্রয়োজন",
                     minLength: {
                       value: 11,
-                      message: "Must be a valid BD number"
+                      message: "বৈধ বাংলাদেশী নম্বর হতে হবে"
                     }
                   })}
                 />
@@ -211,10 +211,10 @@ const ProfileDetals = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Transaction ID"
+                  placeholder="ট্রানজেকশন আইডি"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("transactionId", { 
-                    required: "Transaction ID is required",
+                    required: "ট্রানজেকশন আইডি প্রয়োজন",
                   })}
                 />
                 {errors?.transactionId && (
@@ -227,12 +227,10 @@ const ProfileDetals = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Receiver's Number (01795944731)"
+                  placeholder="রিসিভার নম্বর (০১৭৯৫৯৪৪৭৩১)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("ToNumber", { 
-                    required: "Receiver number is required",
-                    // validate: value => 
-                    //   value === (01795944731) || "Must be our payment number"
+                    required: "রিসিভার নম্বর প্রয়োজন",
                   })}
                 />
                 {errors.ToNumber && (
@@ -245,13 +243,13 @@ const ProfileDetals = () => {
               <div>
                 <input
                   type="number"
-                  placeholder="Amount (৳100)"
+                  placeholder="পরিমাণ (৳১০০)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("Amount", { 
-                    required: "Amount is required",
+                    required: "পরিমাণ প্রয়োজন",
                     min: {
                       value: 100,
-                      message: "Minimum amount is ৳100"
+                      message: "ন্যূনতম পরিমাণ ৳১০০"
                     }
                   })}
                 />
@@ -270,9 +268,9 @@ const ProfileDetals = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="animate-pulse">Processing...</span>
+                  <span className="animate-pulse">প্রক্রিয়াকরণ হচ্ছে...</span>
                 ) : (
-                  "Submit Payment Details"
+                  "পেমেন্ট বিবরণ জমা দিন"
                 )}
               </Button>
               <Button
@@ -281,21 +279,21 @@ const ProfileDetals = () => {
                 onClick={() => setIsSecondModalOpen(false)}
                 className="w-full text-gray-300 hover:bg-gray-700"
               >
-                Cancel
+                বাতিল করুন
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-        {/* Payment Success Modal */}
+        {/* পেমেন্ট সফল মোডাল */}
         <PaymentSuccesfulModal
         paymentDetails={paymentDetails}
         open={isSuccessModalOpen}
         onOpenChange={setIsSuccessModalOpen}
       />
 
-      {/* Payment Components for Active Users */}
+      {/* সক্রিয় ব্যবহারকারীদের জন্য পেমেন্ট কম্পোনেন্ট */}
       {user?.status === "Active" && (
         <div className="w-full md:w-1/2 space-y-8">
           {Number(user?.earnings) > 0 && <PaymentRequested />}

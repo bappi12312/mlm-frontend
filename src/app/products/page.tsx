@@ -64,7 +64,7 @@ const ProductPage = () => {
     <div className="container w-full space-y-20">
       <div>
          {/* অ্যাক্টিভেশন বাটন */}
-         {  (
+         {   (
               <div className="mt-6">
                 <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
                   <DialogTrigger asChild>
