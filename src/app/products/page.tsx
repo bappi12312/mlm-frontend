@@ -43,52 +43,52 @@ const ProductPage = () => {
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
       try {
         const result = await paymentCreation(data).unwrap();
-        toast.success(result?.message || "Submission successful!");
+        toast.success(result?.message || "সফলভাবে জমা দেওয়া হয়েছে!");
         setIsSecondModalOpen(false);
         setPaymentDetails(data);
         setIsSecondModalOpen(false);
-        setIsSuccessModalOpen(true); // Add this line
+        setIsSuccessModalOpen(true);
         reset();
       } catch (error: unknown) {
-        console.error("Submission failed", error);
-        toast.error( "Submission failed. Please try again.");
+        console.error("জমা দিতে ব্যর্থ হয়েছে", error);
+        toast.error("জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
       }
     };
   
   
   const courses : CoursePakage[] = data?.data?.courses
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: something went wrong</div>
+  if (loading) return <div>লোড হচ্ছে...</div>
+  if (error) return <div>ত্রুটি: কিছু একটা সমস্যা হয়েছে</div>
   return (
     <div className="container w-full space-y-20">
       <div>
-         {/* Activate Account Button */}
+         {/* অ্যাক্টিভেশন বাটন */}
          {  (
               <div className="mt-6">
                 <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
                   <DialogTrigger asChild>
                     <Button className="w-full bg-green-600 hover:bg-green-700 text-lg">
-                      Want to be a Affiliator 
+                      অ্যাফিলিয়েটর হতে চান 
                     </Button>
                   </DialogTrigger>
                   
-                  {/* First Modal - Payment Instructions */}
+                  {/* প্রথম মোডাল - পেমেন্ট নির্দেশনা */}
                   <DialogContent className="bg-gray-800 text-white max-w-md">
                     <DialogHeader>
                       <DialogTitle className="text-2xl text-center mb-4">
-                        Activation Instructions
+                        অ্যাক্টিভেশন নির্দেশনা
                       </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6">
                       <div className="text-center">
                         <p className="text-gray-300 mb-4">
-                          Please send ৳250 to one of these numbers:
+                          অনুগ্রহ করে ৳২৫০ নিচের যেকোনো একটি নম্বরে পাঠান:
                         </p>
                         <div className="space-y-3 font-mono">
-                          <p>Bkash: 01795944731</p>
-                          <p>Nagad: 01795944731</p>
-                          <p>Rocket: 01795944731</p>
+                          <p>বিকাশ: 01795944731</p>
+                          <p>নগদ: 01795944731</p>
+                          <p>রকেট: 01795944731</p>
                         </div>
                       </div>
                       <div className="flex flex-col gap-3">
@@ -99,14 +99,14 @@ const ProductPage = () => {
                           }}
                           className="w-full bg-green-600 hover:bg-green-700"
                         >
-                        I&apos;ve Sent Payment - Next
+                          আমি পেমেন্ট পাঠিয়েছি - পরবর্তী
                         </Button>
                         <Button
                           variant="outline"
                           onClick={() => setIsFirstModalOpen(false)}
                           className="w-full text-gray-300 hover:bg-gray-700"
                         >
-                          Cancel
+                          বাতিল করুন
                         </Button>
                       </div>
                     </div>
@@ -116,12 +116,12 @@ const ProductPage = () => {
             )}
       </div>
       <div>
-         {/* Payment Form Modal */}
+         {/* পেমেন্ট ফর্ম মোডাল */}
       <Dialog open={isSecondModalOpen} onOpenChange={setIsSecondModalOpen}>
         <DialogContent className="bg-gray-800 text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center mb-4">
-              Payment Details
+              পেমেন্ট বিবরণ
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -129,13 +129,13 @@ const ProductPage = () => {
               <div>
                 <input
                   type="number"
-                  placeholder="Your Mobile Number"
+                  placeholder="আপনার মোবাইল নম্বর"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("FromNumber", { 
-                    required: "Your number is required",
+                    required: "আপনার নম্বর প্রয়োজন",
                     minLength: {
                       value: 11,
-                      message: "Must be a valid BD number"
+                      message: "বৈধ বাংলাদেশী নম্বর হতে হবে"
                     }
                   })}
                 />
@@ -149,10 +149,10 @@ const ProductPage = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Transaction ID"
+                  placeholder="ট্রানজেকশন আইডি"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("transactionId", { 
-                    required: "Transaction ID is required",
+                    required: "ট্রানজেকশন আইডি প্রয়োজন",
                   })}
                 />
                 {errors?.transactionId && (
@@ -165,12 +165,10 @@ const ProductPage = () => {
               <div>
                 <input
                   type="number"
-                  placeholder="Receiver's Number (01795944731)"
+                  placeholder="রিসিভার নম্বর (০১৭৯৫৯৪৪৭৩১)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("ToNumber", { 
-                    required: "Receiver number is required",
-                    // validate: value => 
-                    //   value === 1795944731 || "Must be our payment number"
+                    required: "রিসিভার নম্বর প্রয়োজন",
                   })}
                 />
                 {errors.ToNumber && (
@@ -183,13 +181,13 @@ const ProductPage = () => {
               <div>
                 <input
                   type="number"
-                  placeholder="Amount (৳250)"
+                  placeholder="পরিমাণ (৳২৫০)"
                   className="w-full p-3 bg-gray-700 rounded-lg placeholder-gray-400"
                   {...register("Amount", { 
-                    required: "Amount is required",
+                    required: "পরিমাণ প্রয়োজন",
                     min: {
                       value: 250,
-                      message: "Minimum amount is ৳250"
+                      message: "ন্যূনতম পরিমাণ ৳২৫০"
                     }
                   })}
                 />
@@ -208,9 +206,9 @@ const ProductPage = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="animate-pulse">Processing...</span>
+                  <span className="animate-pulse">প্রক্রিয়াকরণ হচ্ছে...</span>
                 ) : (
-                  "Submit Payment Details"
+                  "পেমেন্ট বিবরণ জমা দিন"
                 )}
               </Button>
               <Button
@@ -219,7 +217,7 @@ const ProductPage = () => {
                 onClick={() => setIsSecondModalOpen(false)}
                 className="w-full text-gray-300 hover:bg-gray-700"
               >
-                Cancel
+                বাতিল করুন
               </Button>
             </div>
           </form>
@@ -227,7 +225,7 @@ const ProductPage = () => {
       </Dialog>
       </div>
       <div className="flex justify-center h-full">
-        <h1 className="text-2xl md:text-3xl font-bold text-main">Featured Products</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-main">ফিচার্ড প্রোডাক্টসমূহ</h1>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {
@@ -237,7 +235,7 @@ const ProductPage = () => {
       }
       </div>
 
-        {/* Payment Success Modal */}
+        {/* পেমেন্ট সাক্সেস মোডাল */}
         <PaymentSuccesfulModal
         paymentDetails={paymentDetails}
         open={isSuccessModalOpen}

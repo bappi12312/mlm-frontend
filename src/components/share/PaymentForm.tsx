@@ -24,17 +24,17 @@ import { usePaymentCreationMutation } from "@/lib/store/features/api/authApi";
 import { toast } from "sonner";
 import PaymentSuccesfulModal from "./modal/PaymentSuccesfulModal";
 
-// Payment details schema
+// পেমেন্ট বিবরণ সচéma
 const paymentSchema = z.object({
-  fromNumber: z.string().min(11, "Must be a valid BD number"),
-  toNumber: z.string().min(11, "Must be a valid BD number"),
-  amount: z.number().min(100, "Minimum amount is ৳100"),
-  transactionId: z.string().min(1, "Transaction ID is required"),
+  fromNumber: z.string().min(11, "বৈধ বাংলাদেশী নম্বর হতে হবে"),
+  toNumber: z.string().min(11, "বৈধ বাংলাদেশী নম্বর হতে হবে"),
+  amount: z.number().min(100, "ন্যূনতম পরিমাণ ৳১০০"),
+  transactionId: z.string().min(1, "ট্রানজেকশন আইডি প্রয়োজন"),
 });
 
-// Affiliate code schema
+// অ্যাফিলিয়েট কোড সচéma
 const affiliateSchema = z.object({
-  affiliateCode: z.string().min(1, "Affiliate code is required"),
+  affiliateCode: z.string().min(1, "অ্যাফিলিয়েট কোড প্রয়োজন"),
 });
 
 type PaymentFormProps = {
@@ -58,7 +58,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
   });
   const [paymentCreation, { isLoading }] = usePaymentCreationMutation();
 
-  // Payment details form
+  // পেমেন্ট বিবরণ ফর্ম
   const paymentForm = useForm<z.infer<typeof paymentSchema>>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -69,7 +69,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
     },
   });
 
-  // Affiliate code form
+  // অ্যাফিলিয়েট কোড ফর্ম
   const affiliateForm = useForm<z.infer<typeof affiliateSchema>>({
     resolver: zodResolver(affiliateSchema),
     defaultValues: {
@@ -93,10 +93,10 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
         transactionId: values.transactionId,
       });
 
-      toast.success(result?.message || "Payment verified successfully!");
+      toast.success(result?.message || "পেমেন্ট সফলভাবে যাচাই করা হয়েছে!");
       setCurrentStep(2);
     } catch (error: unknown) {
-      toast.error("Payment verification failed");
+      toast.error("পেমেন্ট যাচাই ব্যর্থ হয়েছে");
     }
   };
 
@@ -104,41 +104,38 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
     values: z.infer<typeof affiliateSchema>
   ) => {
     try {
-      // Wait for parent submission to complete
       await onFormSubmit(values);
-
-      toast.success("Payment completed successfully!");
+      toast.success("পেমেন্ট সফলভাবে সম্পন্ন হয়েছে!");
       setIsSuccessModalOpen(true);
       setCurrentStep(0);
       affiliateForm.reset();
       paymentForm.reset();
     } catch (error) {
-      // Handle errors from parent submission
-      toast.error("Failed to complete payment. Please try again.");
+      toast.error("পেমেন্ট সম্পন্ন করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
     }
   };
+
   const steps = [
     {
-      title: "Payment Instructions",
+      title: "পেমেন্ট নির্দেশনা",
       content: (
         <div className="space-y-4">
           <p className="text-gray-300">
-            Please complete your payment of ৳{product.price} to one of these
-            numbers:
+            অনুগ্রহ করে ৳{product.price} পরিমাণ নিচের যেকোনো একটি নম্বরে পেমেন্ট সম্পন্ন করুন:
           </p>
           <div className="space-y-2 font-mono">
-            <p>Bkash: 01795944731</p>
-            <p>Nagad: 01795944731</p>
-            <p>Rocket: 01795944731</p>
+            <p>বিকাশ: 01795944731</p>
+            <p>নগদ: 01795944731</p>
+            <p>রকেট: 01795944731</p>
           </div>
           <Button className="w-full mt-4" onClick={() => setCurrentStep(1)}>
-            I Have Made Payment - Next
+            আমি পেমেন্ট করেছি - পরবর্তী
           </Button>
         </div>
       ),
     },
     {
-      title: "Payment Verification",
+      title: "পেমেন্ট যাচাইকরণ",
       content: (
         <Form {...paymentForm}>
           <form
@@ -150,7 +147,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
               name="fromNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your Mobile Number</FormLabel>
+                  <FormLabel>আপনার মোবাইল নম্বর</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="017XXXXXXXX"
@@ -168,7 +165,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
               name="toNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Receiver Mobiles Number</FormLabel>
+                  <FormLabel>রিসিভার মোবাইল নম্বর</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="01795944731"
@@ -181,15 +178,15 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
               )}
             />
 
-<FormField
+            <FormField
               control={paymentForm.control}
               name="transactionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Transaction ID</FormLabel>
+                  <FormLabel>ট্রানজেকশন আইডি</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter Transaction ID"
+                      placeholder="ট্রানজেকশন আইডি লিখুন"
                       className="text-gray-400"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value)}
@@ -205,7 +202,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>পরিমাণ</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -227,10 +224,10 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                 onClick={() => setCurrentStep(0)}
                 type="button"
               >
-                Back
+                পিছনে
               </Button>
               <Button className="w-full" type="submit" disabled={isLoading}>
-                {isLoading ? "Verifying..." : "Verify Payment"}
+                {isLoading ? "যাচাই করা হচ্ছে..." : "পেমেন্ট যাচাই করুন"}
               </Button>
             </div>
           </form>
@@ -238,7 +235,7 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
       ),
     },
     {
-      title: "Affiliate Code",
+      title: "অ্যাফিলিয়েট কোড",
       content: (
         <Form {...affiliateForm}>
           <form
@@ -254,10 +251,10 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                   name="affiliateCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Affiliate Code</FormLabel>
+                      <FormLabel>অ্যাফিলিয়েট কোড</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter affiliate code"
+                          placeholder="অ্যাফিলিয়েট কোড লিখুন"
                           className="text-gray-400"
                           {...field}
                         />
@@ -276,10 +273,10 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
                 onClick={() => setCurrentStep(0)}
                 type="button"
               >
-                Back
+                পিছনে
               </Button>
               <Button className="w-full" type="submit" disabled={isLoading}>
-                {isLoading ? "Verifying..." : "complete Payment"}
+                {isLoading ? "যাচাই করা হচ্ছে..." : "পেমেন্ট সম্পন্ন করুন"}
               </Button>
             </div>
           </form>
@@ -290,33 +287,33 @@ const PaymentForm = ({ product, onFormSubmit }: PaymentFormProps) => {
 
   return (
     <>
-    <Dialog
-      onOpenChange={() => {
-        if (!open) {
-          setCurrentStep(0);
-          paymentForm.reset();
-          affiliateForm.reset();
-        }
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button className="flex-1" variant={"destructive"}>
-          Pay now
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-black text-white">
-        <DialogHeader>
-          <DialogTitle>{steps[currentStep].title}</DialogTitle>
-          {currentStep === 0 && (
-            <p className="text-sm text-gray-400">Purchasing: {product.name}</p>
-          )}
-        </DialogHeader>
+      <Dialog
+        onOpenChange={() => {
+          if (!open) {
+            setCurrentStep(0);
+            paymentForm.reset();
+            affiliateForm.reset();
+          }
+        }}
+      >
+        <DialogTrigger asChild>
+          <Button className="flex-1" variant={"destructive"}>
+            এখনই পেমেন্ট করুন
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px] bg-black text-white">
+          <DialogHeader>
+            <DialogTitle>{steps[currentStep].title}</DialogTitle>
+            {currentStep === 0 && (
+              <p className="text-sm text-gray-400">ক্রয় করা হচ্ছে: {product.name}</p>
+            )}
+          </DialogHeader>
 
-        {steps[currentStep].content}
-      </DialogContent>
-    </Dialog>
+          {steps[currentStep].content}
+        </DialogContent>
+      </Dialog>
 
-    <PaymentSuccesfulModal
+      <PaymentSuccesfulModal
         open={isSuccessModalOpen}
         onOpenChange={setIsSuccessModalOpen}
         paymentDetails={paymentDetails}
